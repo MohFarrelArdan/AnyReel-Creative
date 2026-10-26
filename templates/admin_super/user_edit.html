@@ -1,0 +1,120 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Edit User — Sistem Manajemen{% endblock %}
+{% block role_label %}Super Admin{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+
+{% block sidebar_nav %}
+<p class="nav-section-label">Menu</p>
+<a href="{% url 'app:dashboard' %}" class="nav-item">
+  <i class="fa-solid fa-chart-pie"></i> Dashboard
+</a>
+<a href="{% url 'app:user_list' %}" class="nav-item active">
+  <i class="fa-solid fa-users"></i> Manajemen User
+</a>
+<p class="nav-section-label">Akun</p>
+<a href="{% url 'app:profile_admin' %}" class="nav-item">
+  <i class="fa-solid fa-circle-user"></i> Profil Admin
+</a>
+{% endblock %}
+
+{% block page_title %}Edit User{% endblock %}
+{% block page_subtitle %}{{ edit_user.first_name }}{% endblock %}
+
+{% block page_body %}
+<div style="max-width: 720px;">
+  <!-- User info card -->
+  <div class="profile-header-card" style="margin-bottom: 24px;">
+    {% if pengguna and pengguna.photo %}
+      <img src="{{ pengguna.photo.url }}" alt="Foto" class="profile-avatar-large" />
+    {% else %}
+      <div class="profile-avatar-large-placeholder">{{ edit_user.first_name|first|upper }}</div>
+    {% endif %}
+    <div class="profile-header-info">
+      <h2>{{ edit_user.first_name }}</h2>
+      <p>{{ edit_user.email }}</p>
+      <p style="margin-top: 8px;">
+        Bergabung: {{ edit_user.date_joined|date:"d M Y" }}
+        &nbsp;|&nbsp;
+        {% if edit_user.is_active %}
+          <span class="badge badge-success"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Aktif</span>
+        {% else %}
+          <span class="badge badge-danger"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Nonaktif</span>
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-title"><i class="fa-solid fa-pen-to-square" style="color:var(--primary);margin-right:8px;"></i>Edit Data User</div>
+    <form method="POST" action="{% url 'app:user_edit' edit_user.pk %}">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group-dash">
+          <label class="form-label-dash" for="first_name">Nama Lengkap</label>
+          <input type="text" id="first_name" name="first_name" class="form-input-dash"
+            value="{{ edit_user.first_name }}" placeholder="Nama lengkap" required />
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash" for="email">Email / Username</label>
+          <input type="email" id="email" name="email" class="form-input-dash"
+            value="{{ edit_user.email }}" placeholder="email@domain.com" required />
+        </div>
+      </div>
+      <div class="form-group-dash">
+        <label class="form-label-dash" for="new_password">Password Baru <span style="color: var(--text-muted); font-weight:400; text-transform:none;">(kosongkan jika tidak ingin mengubah)</span></label>
+        <input type="password" id="new_password" name="new_password" class="form-input-dash"
+          placeholder="Password baru (opsional)" autocomplete="new-password" />
+      </div>
+      <div class="form-group-dash">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+          <input type="checkbox" name="is_active" id="is_active" {% if edit_user.is_active %}checked{% endif %}
+            style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;" />
+          <span style="font-size:14px; color:var(--text);">Akun Aktif</span>
+        </label>
+      </div>
+
+      {% if pengguna %}
+      <div style="background: rgba(99,102,241,0.06); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 8px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Info Profil Pengguna</div>
+        <div class="form-grid" style="gap:12px;">
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Telepon</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.telp|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Gender</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.gender|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Alamat</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.alamat|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Provinsi</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.provinsi_anggota|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Jabatan Fungsional</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.jafung|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Bidang Keahlian</div>
+            <div style="font-size:14px;color:var(--text);">{{ pengguna.bidang_keahlian|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="btn-save-user">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+        </button>
+        <a href="{% url 'app:user_list' %}" class="btn btn-ghost">
+          <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

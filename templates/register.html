@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Akun — Sistem Manajemen{% endblock %}
+
+{% block extra_styles %}
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-page::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 40%, rgba(99,102,241,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(14,165,233,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.auth-card {
+  background: rgba(26,26,46,0.85);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 44px;
+  width: 100%; max-width: 480px;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.03);
+  position: relative; z-index: 1;
+  animation: fadeUp 0.5s ease;
+}
+@keyframes fadeUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+.auth-logo {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+}
+.auth-logo-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+}
+.auth-logo-text h2 { font-size: 18px; font-weight: 700; color: var(--text); }
+.auth-logo-text span { font-size: 12px; color: var(--text-muted); }
+.auth-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.auth-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px;
+}
+.input-wrapper { position: relative; }
+.input-wrapper i {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); font-size: 15px;
+}
+.form-input {
+  width: 100%; padding: 13px 16px 13px 44px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 14px; transition: all 0.2s ease; outline: none;
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.form-input::placeholder { color: #475569; }
+.btn-auth {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff; border: none; border-radius: 12px;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+  margin-top: 8px;
+}
+.btn-auth:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99,102,241,0.5); }
+.auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted); }
+.auth-footer a { color: var(--primary-light); font-weight: 600; }
+.auth-footer a:hover { color: var(--primary); }
+.password-hint { font-size: 11px; color: #475569; margin-top: 5px; }
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="auth-logo-text">
+        <h2>SistemManajemen</h2>
+        <span>Platform Modern & Aman</span>
+      </div>
+    </div>
+    <h1 class="auth-title">Buat Akun Baru ✨</h1>
+    <p class="auth-subtitle">Daftarkan diri Anda untuk mulai menggunakan platform</p>
+
+    <form method="POST" action="{% url 'register' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="first_name">NAMA LENGKAP</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Nama Anda" required autocomplete="name" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">ALAMAT EMAIL</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope"></i>
+          <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required autocomplete="email" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">PASSWORD</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="password" name="password" class="form-input" placeholder="Minimal 8 karakter" required autocomplete="new-password" minlength="8" />
+        </div>
+        <p class="password-hint">Gunakan kombinasi huruf, angka, dan simbol.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm_password">KONFIRMASI PASSWORD</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-shield-check"></i>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Ulangi password" required autocomplete="new-password" />
+        </div>
+      </div>
+      <button type="submit" class="btn-auth" id="btn-register">
+        <i class="fa-solid fa-user-plus"></i> Daftar Sekarang
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Sudah punya akun? <a href="{% url 'login' %}">Masuk di sini</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

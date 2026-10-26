@@ -1,0 +1,162 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Profil Pengguna — Sistem Manajemen{% endblock %}
+{% block role_label %}Pengguna{% endblock %}
+{% block role_badge %}Pengguna{% endblock %}
+
+{% block sidebar_nav %}
+<p class="nav-section-label">Menu</p>
+<a href="{% url 'app:dashboard' %}" class="nav-item">
+  <i class="fa-solid fa-house"></i> Dashboard
+</a>
+<p class="nav-section-label">Akun</p>
+<a href="{% url 'app:profile_pengguna' %}" class="nav-item active">
+  <i class="fa-solid fa-circle-user"></i> Profil Saya
+</a>
+{% endblock %}
+
+{% block page_title %}Profil Saya{% endblock %}
+
+{% block page_body %}
+<div style="max-width: 800px;">
+  <!-- Profile Header -->
+  <div class="profile-header-card" style="margin-bottom: 24px;">
+    {% if photo %}
+      <img src="{{ photo.url }}" alt="Foto Profil" class="profile-avatar-large" />
+    {% else %}
+      <div class="profile-avatar-large-placeholder">{{ request.user.first_name|first|upper }}</div>
+    {% endif %}
+    <div class="profile-header-info">
+      <h2>{{ request.user.first_name }}</h2>
+      <p>{{ request.user.email }}</p>
+      {% if userpengguna.jafung %}
+      <p style="margin-top: 6px;">
+        <span class="badge badge-primary">{{ userpengguna.jafung }}</span>
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-title">
+      <i class="fa-solid fa-pen-to-square" style="color:var(--primary);margin-right:8px;"></i>
+      Edit Profil Saya
+    </div>
+    <form method="POST" action="{% url 'app:profile_pengguna' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Style Django widgets -->
+      <style>
+        .form-control, #id_telp, #id_gender, #id_nuptk, #id_jafung,
+        #id_bidang_keahlian, #id_alamat, #id_photo, #id_provinsi_anggota,
+        #id_link_sinta, #id_link_scopus, #id_link_google_scholar, #id_link_orcid {
+          width: 100%; padding: 12px 16px;
+          background: var(--bg-input) !important; border: 1px solid var(--border) !important;
+          border-radius: 10px !important; color: var(--text) !important;
+          font-family: 'Inter', sans-serif !important;
+          font-size: 14px !important; transition: all 0.2s ease; outline: none;
+        }
+        .form-control:focus, #id_telp:focus, #id_gender:focus, #id_nuptk:focus,
+        #id_jafung:focus, #id_bidang_keahlian:focus, #id_alamat:focus,
+        #id_provinsi_anggota:focus, #id_link_sinta:focus, #id_link_scopus:focus,
+        #id_link_google_scholar:focus, #id_link_orcid:focus {
+          border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+        }
+        option { background: #1a1a2e; color: var(--text); }
+        .form-section-divider {
+          font-size: 12px; font-weight: 700; color: var(--text-muted);
+          text-transform: uppercase; letter-spacing: 0.8px;
+          margin: 24px 0 16px; padding-bottom: 10px;
+          border-bottom: 1px solid var(--border);
+        }
+      </style>
+
+      <!-- Personal Info -->
+      <div class="form-section-divider"><i class="fa-solid fa-user" style="margin-right:6px;"></i>Informasi Pribadi</div>
+      <div class="form-grid">
+        <div class="form-group-dash">
+          <label class="form-label-dash">Nomor Telepon *</label>
+          {{ form.telp }}
+          {% for e in form.telp.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Jenis Kelamin *</label>
+          {{ form.gender }}
+          {% for e in form.gender.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group-dash">
+          <label class="form-label-dash">Alamat Instansi</label>
+          {{ form.alamat }}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Provinsi Domisili *</label>
+          {{ form.provinsi_anggota }}
+          {% for e in form.provinsi_anggota.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+        </div>
+      </div>
+
+      <!-- Academic Info -->
+      <div class="form-section-divider"><i class="fa-solid fa-graduation-cap" style="margin-right:6px;"></i>Informasi Akademik</div>
+      <div class="form-grid">
+        <div class="form-group-dash">
+          <label class="form-label-dash">NUPTK</label>
+          {{ form.nuptk }}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Jabatan Fungsional</label>
+          {{ form.jafung }}
+        </div>
+      </div>
+      <div class="form-group-dash">
+        <label class="form-label-dash">Bidang Keahlian</label>
+        {{ form.bidang_keahlian }}
+      </div>
+
+      <!-- Academic Links -->
+      <div class="form-section-divider"><i class="fa-solid fa-link" style="margin-right:6px;"></i>Link Akademik</div>
+      <div class="form-grid">
+        <div class="form-group-dash">
+          <label class="form-label-dash">Link SINTA *</label>
+          {{ form.link_sinta }}
+          {% for e in form.link_sinta.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Link Scopus</label>
+          {{ form.link_scopus }}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Link Google Scholar</label>
+          {{ form.link_google_scholar }}
+        </div>
+        <div class="form-group-dash">
+          <label class="form-label-dash">Link ORCID</label>
+          {{ form.link_orcid }}
+        </div>
+      </div>
+
+      <!-- Photo -->
+      <div class="form-section-divider"><i class="fa-solid fa-image" style="margin-right:6px;"></i>Foto Profil</div>
+      <div class="form-group-dash">
+        {{ form.photo }}
+        {% if photo %}
+        <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
+          <img src="{{ photo.url }}" alt="Foto saat ini" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" />
+          <span style="font-size:13px;color:var(--text-muted);">Foto profil saat ini</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="btn-save-pengguna">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+        </button>
+        <a href="{% url 'app:dashboard' %}" class="btn btn-ghost">
+          <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

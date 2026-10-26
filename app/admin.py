@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Provinsi, UserAdmin, UserPengguna
 
-# Register your models here.
+admin.site.register(Provinsi)
+admin.site.register(UserPengguna)
+admin.site.register(UserAdmin)    
