@@ -27,6 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'https://*.supabase.co',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 
 # Application definition
 
@@ -42,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -100,8 +108,8 @@ elif os.environ.get('DB_ENGINE') == 'postgresql' or os.environ.get('USE_SUPABASE
             'NAME': os.environ.get('SUPABASE_DB_NAME', 'postgres'),
             'USER': os.environ.get('SUPABASE_DB_USER', 'postgres.ccfcoutegeqfeccznqtq'),
             'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', ''),
-            'HOST': os.environ.get('SUPABASE_DB_HOST', 'aws-0-ap-southeast-1.pooler.supabase.com'),
-            'PORT': os.environ.get('SUPABASE_DB_PORT', '6543'),
+            'HOST': os.environ.get('SUPABASE_DB_HOST', 'aws-1-ap-northeast-1.pooler.supabase.com'),
+            'PORT': os.environ.get('SUPABASE_DB_PORT', '5432'),
             'OPTIONS': {
                 'sslmode': 'require',
             },
@@ -170,10 +178,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Media files
 MEDIA_URL = '/media/'
