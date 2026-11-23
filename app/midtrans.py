@@ -11,47 +11,91 @@ from app.models import WebSetting, Pesanan
 logger = logging.getLogger(__name__)
 
 # Fallback default sandbox key
-DEFAULT_SERVER_KEY = "SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4"
+DEFAULT_SERVER_KEY = "SB-Mid-server-J.j-PoXUUXZKyfZ8dZKsSxkB"
+
+def _auto_detect_production(server_key: str, client_key: str, is_production_setting: bool) -> bool:
+    """
+    Auto-deteksi apakah menggunakan Production berdasarkan prefix key.
+    - SB-Mid-* = Sandbox
+    - Mid-* (tanpa SB-) = Production
+    Prioritas: key prefix > MIDTRANS_IS_PRODUCTION setting
+    """
+    if server_key:
+        if server_key.startswith('SB-'):
+            return False  # Sandbox
+        elif server_key.startswith('Mid-server-'):
+            return True  # Production
+    if client_key:
+        if client_key.startswith('SB-'):
+            return False
+        elif client_key.startswith('Mid-client-') and not client_key.startswith('SB-Mid-'):
+            return True
+    return is_production_setting
 
 def get_midtrans_config():
     """
-    Mengambil konfigurasi Midtrans dari WebSetting (database)
-    atau fallback ke settings.py / DEFAULT_SERVER_KEY.
+    Mengambil konfigurasi Midtrans dari settings.py / .env / WebSetting (database).
+    Prioritas utama adalah environment variables, dengan fallback ke WebSetting dan DEFAULT_SERVER_KEY.
+    Auto-detect is_production berdasarkan prefix key (SB- = Sandbox, Mid- = Production).
     """
+    env_server_key = getattr(settings, 'MIDTRANS_SERVER_KEY', '') or DEFAULT_SERVER_KEY
+    env_client_key = getattr(settings, 'MIDTRANS_CLIENT_KEY', '')
+    is_production_setting = getattr(settings, 'MIDTRANS_IS_PRODUCTION', False)
+
+    server_key = ""
+    client_key = ""
+    is_production = is_production_setting
+
     try:
         ws = WebSetting.get_solo()
-        server_key = ws.midtrans_server_key.strip() if ws.midtrans_server_key else ""
-        client_key = ws.midtrans_client_key.strip() if ws.midtrans_client_key else ""
-        is_production = bool(ws.midtrans_is_production)
+        if ws:
+            # Gunakan key dari DB jika ada dan bukan dummy lama
+            if ws.midtrans_server_key and ws.midtrans_server_key not in ("", "SB-Mid-server-huy54xxxxx"):
+                server_key = ws.midtrans_server_key.strip()
+            else:
+                server_key = env_server_key
+                try:
+                    ws.midtrans_server_key = server_key
+                    ws.save(update_fields=['midtrans_server_key'])
+                except Exception:
+                    pass
+
+            # client_key: DB → env fallback
+            if ws.midtrans_client_key and ws.midtrans_client_key.strip():
+                client_key = ws.midtrans_client_key.strip()
+            else:
+                client_key = env_client_key
+                # Simpan ke DB supaya ke depannya sudah ada
+                if client_key:
+                    try:
+                        ws.midtrans_client_key = client_key
+                        ws.save(update_fields=['midtrans_client_key'])
+                    except Exception:
+                        pass
+
+            # Auto-detect is_production dari prefix key
+            is_production = _auto_detect_production(server_key, client_key, bool(ws.midtrans_is_production))
+
     except Exception:
-        server_key = ""
-        client_key = ""
-        is_production = False
+        server_key = env_server_key
+        client_key = env_client_key
+        is_production = _auto_detect_production(env_server_key, env_client_key, is_production_setting)
 
     if not server_key:
-        server_key = getattr(settings, 'MIDTRANS_SERVER_KEY', DEFAULT_SERVER_KEY)
+        server_key = env_server_key or DEFAULT_SERVER_KEY
+
     if not client_key:
-        client_key = getattr(settings, 'MIDTRANS_CLIENT_KEY', '')
-    if 'is_production' not in locals():
-        is_production = getattr(settings, 'MIDTRANS_IS_PRODUCTION', False)
+        client_key = env_client_key
 
-    snap_api_url = (
-        "https://app.midtrans.com/snap/v1/transactions"
-        if is_production else
-        "https://app.sandbox.midtrans.com/snap/v1/transactions"
-    )
-
-    core_api_url = (
-        "https://api.midtrans.com/v2"
-        if is_production else
-        "https://api.sandbox.midtrans.com/v2"
-    )
-
-    snap_js_url = (
-        "https://app.midtrans.com/snap/snap.js"
-        if is_production else
-        "https://app.sandbox.midtrans.com/snap/snap.js"
-    )
+    # Tentukan URL berdasarkan is_production yang sudah di-detect
+    if is_production:
+        snap_api_url = "https://app.midtrans.com/snap/v1/transactions"
+        core_api_url = "https://api.midtrans.com/v2"
+        snap_js_url  = "https://app.midtrans.com/snap/snap.js"
+    else:
+        snap_api_url = "https://app.sandbox.midtrans.com/snap/v1/transactions"
+        core_api_url = "https://api.sandbox.midtrans.com/v2"
+        snap_js_url  = "https://app.sandbox.midtrans.com/snap/snap.js"
 
     return {
         'server_key': server_key,

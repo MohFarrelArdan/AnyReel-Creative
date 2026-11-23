@@ -587,7 +587,7 @@ footer {
               <i class="fa-solid fa-chart-pie" style="color: #6a7d4e;"></i>
               <span>Dashboard Saya</span>
             </a>
-            {% if request.user.is_superuser or request.user.last_name == 'Super Admin' %}
+            {% if request.user.is_superuser or request.user.is_staff or request.user.last_name == 'Super Admin' or request.user.last_name == 'Admin' %}
               <a href="{% url 'app:user_list' %}">
                 <i class="fa-solid fa-users-gear" style="color: #6a7d4e;"></i>
                 <span>Manajemen User</span>

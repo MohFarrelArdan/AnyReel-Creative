@@ -471,7 +471,7 @@ def web_settings(request):
 
         # 6. Midtrans Payment Gateway
         if 'midtrans_server_key' in request.POST:
-            setting.midtrans_server_key = request.POST.get('midtrans_server_key', '').strip() or 'SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4'
+            setting.midtrans_server_key = request.POST.get('midtrans_server_key', '').strip() or 'SB-Mid-server-J.j-PoUUXZKyfZ8dZKsSxkB'
         if 'midtrans_client_key' in request.POST:
             setting.midtrans_client_key = request.POST.get('midtrans_client_key', '').strip()
         if 'midtrans_is_production' in request.POST:

@@ -342,13 +342,14 @@ def payment_pageView(request, order_id):
         return redirect('app:dashboard')
 
     # Keamanan akses: pastikan pemilik pesanan atau superadmin/staff
-    if pesanan.user != request.user and not request.user.is_superuser and request.user.last_name != 'Admin':
+    if pesanan.user != request.user and not (request.user.is_superuser or request.user.is_staff or request.user.last_name in ['Super Admin', 'Admin']):
         messages.error(request, 'Anda tidak memiliki otorisasi untuk mengakses rincian pesanan ini.')
         return redirect('app:dashboard')
 
-    # Jika snap_token belum ada, buat sekarang
-    if not pesanan.snap_token and pesanan.payment_status in ['unpaid', 'pending']:
+    # Jika snap_token belum ada atau user meminta refresh token
+    if (request.GET.get('refresh_token') == '1' or not pesanan.snap_token) and pesanan.payment_status in ['unpaid', 'pending']:
         create_snap_transaction(pesanan, request=request)
+        pesanan.refresh_from_db()
 
     midtrans_cfg = get_midtrans_config()
 
@@ -507,7 +508,7 @@ def pesan_upload_footageView(request, order_id):
         messages.error(request, 'Pesanan tidak ditemukan.')
         return redirect('app:dashboard')
 
-    if pesanan.user != request.user and not request.user.is_superuser and request.user.last_name != 'Admin':
+    if pesanan.user != request.user and not (request.user.is_superuser or request.user.is_staff or request.user.last_name in ['Super Admin', 'Admin']):
         messages.error(request, 'Anda tidak memiliki hak akses untuk pesanan ini.')
         return redirect('app:dashboard')
 

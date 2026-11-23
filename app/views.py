@@ -5,13 +5,14 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.utils import timezone
 from .models import UserAdmin, UserPengguna, Provinsi, Pesanan, Layanan, Artikel
+from .decorators_admin import is_admin_user
 
 
 @login_required
 def index(request):
     today = timezone.localdate()
 
-    if request.user.last_name == 'Super Admin' or request.user.is_superuser:
+    if is_admin_user(request.user):
         userC = UserAdmin.objects.filter(username=request.user).first()
         total_pengguna = UserPengguna.objects.count()
         total_provinsi = Provinsi.objects.count()

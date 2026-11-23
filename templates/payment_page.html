@@ -3,9 +3,7 @@
 {% block title %}Pembayaran {{ pesanan.order_id }} — FRAMEHAUS{% endblock %}
 
 {% block public_extra_head %}
-{% if client_key %}
 <script type="text/javascript" src="{{ snap_js_url }}" data-client-key="{{ client_key }}"></script>
-{% endif %}
 {% endblock %}
 
 {% block public_extra_styles %}
@@ -555,10 +553,10 @@
       <div class="sandbox-badge">
         <div class="sandbox-badge-title">
           <i class="fa-solid fa-flask"></i>
-          Midtrans Sandbox Payment Gateway Terpasang
+          Midtrans Sandbox Aktif
         </div>
         <p class="sandbox-badge-text">
-          Sistem checkout terintegrasi dengan API Midtrans Sandbox resmi. Klik tombol <b>"Bayar Sekarang (Midtrans Snap)"</b> di samping untuk membuka modul pembayaran langsung di layar Anda.
+          Server Key Sandbox resmi terpasang (<code>{{ server_key_preview }}</code>). Anda dapat melakukan pembayaran melalui dua cara di samping: <b>Halaman Resmi Midtrans Sandbox ↗</b> atau <b>Simulasi di Halaman</b>.
         </p>
       </div>
     </div>
@@ -608,10 +606,10 @@
             Buka Dashboard Saya
           </a>
         {% else %}
-          <!-- PRIMARY ACTION BUTTON: TRIGGER SNAP SANDBOX DIRECTLY -->
+          <!-- TOMBOL BAYAR UTAMA via Midtrans Snap -->
           <button id="pay-button" class="btn-pay-snap" onclick="startSandboxPayment()">
             <i class="fa-solid fa-credit-card"></i>
-            Bayar Sekarang (Midtrans Snap)
+            Bayar
           </button>
 
           <div style="display: flex; gap: 8px; margin-top: 14px;">
@@ -619,8 +617,12 @@
               <i class="fa-solid fa-rotate" id="checkIcon"></i>
               Cek Status Pembayaran
             </button>
+            <a href="{% url 'payment_page' pesanan.clean_order_id %}?refresh_token=1" class="btn-pay-link" style="font-size: 12px; padding: 10px;" title="Hubungi ulang Midtrans untuk token baru">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              Refresh Gateway
+            </a>
             <a href="{% url 'app:dashboard' %}" class="btn-pay-link" style="font-size: 12px; padding: 10px;">
-              Nanti Saja
+              Nanti
             </a>
           </div>
         {% endif %}
@@ -940,11 +942,13 @@
   var currentSelectedMethod = "BCA Virtual Account (Sandbox)";
 
   function startSandboxPayment() {
-    // 1. Jika Midtrans Snap resmi tersedia dan ada Client Key:
-    var token = "{{ snap_token }}";
-    if (typeof window.snap !== 'undefined' && typeof window.snap.pay === 'function') {
+    var snapToken = "{{ snap_token|default:'' }}";
+    var redirectUrl = "{{ snap_redirect_url|default:'' }}";
+
+    // 1. Jika snap.js sudah load DAN ada token yang valid → buka popup Midtrans Snap asli
+    if (typeof window.snap !== 'undefined' && typeof window.snap.pay === 'function' && snapToken && snapToken !== 'None') {
       try {
-        window.snap.pay(token, {
+        window.snap.pay(snapToken, {
           onSuccess: function(result) {
             window.location.href = "{% url 'payment_finish' %}?order_id={{ pesanan.clean_order_id }}&status_code=200&transaction_status=settlement";
           },
@@ -952,20 +956,41 @@
             window.location.href = "{% url 'payment_finish' %}?order_id={{ pesanan.clean_order_id }}&status_code=201&transaction_status=pending";
           },
           onError: function(result) {
-            console.error("Snap error, fallback ke sandbox modal:", result);
-            openSandboxModal();
+            console.error("Snap error:", result);
+            if (redirectUrl && redirectUrl !== 'None') {
+              window.open(redirectUrl, '_blank');
+            } else {
+              openSandboxModal();
+            }
           },
           onClose: function() {
-            console.log("Snap modal closed");
+            console.log("Snap ditutup oleh pengguna.");
           }
         });
         return;
       } catch (e) {
-        console.warn("Snap pay failed, opening internal sandbox modal:", e);
+        console.warn("Snap pay gagal:", e);
       }
     }
 
-    // 2. Default & Garansi Lancar: Langsung buka Sandbox Modal Checkout interaktif di halaman!
+    // 2. Jika ada redirect URL → buka di tab baru sebagai fallback
+    if (redirectUrl && redirectUrl !== 'None') {
+      window.open(redirectUrl, '_blank');
+      return;
+    }
+
+    // 3. Jika tidak ada token sama sekali → minta generate token dulu
+    if (!snapToken || snapToken === 'None' || snapToken === '') {
+      var btn = document.getElementById('pay-button');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan gateway...';
+      }
+      window.location.href = "{% url 'payment_page' pesanan.clean_order_id %}?refresh_token=1";
+      return;
+    }
+
+    // 4. Fallback terakhir: simulasi internal (hanya jika semua gagal)
     openSandboxModal();
   }
 

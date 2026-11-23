@@ -533,12 +533,9 @@
                   <a href="{% url 'app:team_edit' m.id %}" class="btn btn-outline btn-sm" style="padding: 5px 8px; font-size: 11px;">
                     <i class="fa-solid fa-pen-to-square"></i> Edit
                   </a>
-                  <form method="POST" action="{% url 'app:team_delete' m.id %}" style="display: inline;" onsubmit="return confirm('Hapus {{ m.nama|escapejs }}?')">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline btn-sm" style="padding: 5px 8px; color: #c94a4a; font-size: 11px;">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </form>
+                  <button type="button" onclick="deleteTeamMember('{{ m.id }}', '{{ m.nama|escapejs }}')" class="btn btn-outline btn-sm" style="padding: 5px 8px; color: #c94a4a; font-size: 11px;" title="Hapus Anggota">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -664,7 +661,7 @@
       <div class="form-grid">
         <div class="form-group" style="grid-column: 1 / -1;">
           <label class="form-label">Midtrans Server Key *</label>
-          <input type="text" name="midtrans_server_key" value="{{ setting.midtrans_server_key|default:'SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4' }}" required style="font-family: 'DM Mono', monospace;" />
+          <input type="text" name="midtrans_server_key" value="{{ setting.midtrans_server_key|default:'SB-Mid-server-J.j-PoUUXZKyfZ8dZKsSxkB' }}" required style="font-family: 'DM Mono', monospace;" />
           <small class="form-hint">Server Key dari Midtrans Dashboard (Sandbox diawali <code>SB-Mid-server-...</code>).</small>
         </div>
       </div>
@@ -731,5 +728,17 @@
     if (target) target.classList.add('active');
     if (btn) btn.classList.add('active');
   }
+
+  function deleteTeamMember(id, name) {
+    if (confirm(`Hapus anggota tim "${name}"?`)) {
+      const form = document.getElementById('teamDeleteForm');
+      form.action = `/app/admin/team/${id}/delete`;
+      form.submit();
+    }
+  }
 </script>
+
+<form id="teamDeleteForm" method="POST" action="" style="display: none;">
+  {% csrf_token %}
+</form>
 {% endblock %}

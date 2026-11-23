@@ -377,7 +377,7 @@ class WebSetting(models.Model):
     # 6. Midtrans Payment Gateway
     midtrans_server_key = models.CharField(
         max_length=255,
-        default="SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4",
+        default="SB-Mid-server-J.j-PoUUXZKyfZ8dZKsSxkB",
         verbose_name="Midtrans Server Key"
     )
     midtrans_client_key = models.CharField(
