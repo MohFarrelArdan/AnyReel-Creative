@@ -1,74 +1,312 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Dashboard Pengguna — Sistem Manajemen{% endblock %}
-{% block role_label %}Pengguna{% endblock %}
+{% block title %}Dashboard Pengguna — FRAMEHAUS Management{% endblock %}
 {% block role_badge %}Pengguna{% endblock %}
+{% block nav_label %}Workspace{% endblock %}
 
 {% block sidebar_nav %}
-<p class="nav-section-label">Menu</p>
-<a href="{% url 'app:dashboard' %}" class="nav-item active">
-  <i class="fa-solid fa-house"></i> Dashboard
+<a href="{% url 'app:dashboard' %}" class="active">
+  <i class="fa-solid fa-house"></i>
+  <span>Overview & Pesanan</span>
 </a>
-<p class="nav-section-label">Akun</p>
-<a href="{% url 'app:profile_pengguna' %}" class="nav-item">
-  <i class="fa-solid fa-circle-user"></i> Profil Saya
+<a href="{% url 'app:profile_pengguna' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Saya</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}#shop">
+  <i class="fa-solid fa-cart-plus"></i>
+  <span>Pesan Layanan Baru ↗</span>
+</a>
+<a href="{% url 'home' %}">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan</span>
 </a>
 {% endblock %}
 
-{% block page_title %}Dashboard{% endblock %}
-{% block page_subtitle %}Halo, {{ request.user.first_name }}!{% endblock %}
+{% block page_title %}Dashboard Pengguna{% endblock %}
+{% block page_subtitle %}Selamat datang kembali, {{ request.user.first_name|default:request.user.username }}!{% endblock %}
 
 {% block page_body %}
-<!-- Welcome card -->
-<div style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(14,165,233,0.15)); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 28px; display: flex; align-items: center; gap: 24px; position: relative; overflow: hidden;">
-  <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(99,102,241,0.08);pointer-events:none;"></div>
-  {% if photo %}
-    <img src="{{ photo.url }}" alt="Foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);box-shadow:0 0 0 6px rgba(99,102,241,0.15);flex-shrink:0;" />
-  {% else %}
-    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 0 0 6px rgba(99,102,241,0.15);">{{ request.user.first_name|first|upper }}</div>
-  {% endif %}
-  <div>
-    <div style="font-size:22px;font-weight:800;color:var(--text);">Selamat Datang, {{ request.user.first_name }}! 🎉</div>
-    <div style="font-size:14px;color:var(--text-muted);margin-top:6px;">{{ request.user.email }}</div>
-    <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">{{ today|date:"l, d F Y" }}</div>
-  </div>
-</div>
+<!-- WELCOME BANNER -->
+<div style="background: #e9ecdf; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; position: relative; overflow: hidden;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    {% if photo %}
+      <img src="{{ photo.url }}" alt="Foto Profil" class="profile-avatar-lg" />
+    {% else %}
+      <div class="profile-avatar-lg-placeholder">{{ request.user.first_name|default:request.user.username|first|upper }}</div>
+    {% endif %}
 
-<!-- Profile info cards -->
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
-  <div class="stat-card" style="--card-accent: rgba(99,102,241,0.15); --card-color: #818cf8;">
-    <div class="stat-icon"><i class="fa-solid fa-phone"></i></div>
-    <div style="font-size:16px;font-weight:700;color:var(--text);">{{ userdetail.telp|default:"Belum diisi" }}</div>
-    <div class="stat-label">Nomor Telepon</div>
-  </div>
-  <div class="stat-card" style="--card-accent: rgba(14,165,233,0.15); --card-color: #38bdf8;">
-    <div class="stat-icon"><i class="fa-solid fa-venus-mars"></i></div>
-    <div style="font-size:16px;font-weight:700;color:var(--text);">{{ userdetail.gender|default:"Belum diisi" }}</div>
-    <div class="stat-label">Jenis Kelamin</div>
-  </div>
-  <div class="stat-card" style="--card-accent: rgba(34,197,94,0.15); --card-color: #4ade80;">
-    <div class="stat-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-    <div style="font-size:16px;font-weight:700;color:var(--text);">{{ userdetail.provinsi_anggota|default:"Belum diisi" }}</div>
-    <div class="stat-label">Provinsi</div>
-  </div>
-  <div class="stat-card" style="--card-accent: rgba(245,158,11,0.15); --card-color: #fbbf24;">
-    <div class="stat-icon"><i class="fa-solid fa-briefcase"></i></div>
-    <div style="font-size:16px;font-weight:700;color:var(--text);">{{ userdetail.jafung|default:"Belum diisi" }}</div>
-    <div class="stat-label">Jabatan Fungsional</div>
-  </div>
-</div>
-
-<!-- Quick action -->
-<div style="margin-top: 24px;">
-  <a href="{% url 'app:profile_pengguna' %}" class="form-card" style="display:inline-flex; align-items:center; gap:16px; text-decoration:none; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-    <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;box-shadow:0 6px 16px rgba(99,102,241,0.4);">
-      <i class="fa-solid fa-id-card"></i>
-    </div>
     <div>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">Lengkapi Profil Saya</div>
-      <div style="font-size:13px;color:var(--text-muted);margin-top:3px;">Perbarui data diri, foto, dan link akademik</div>
+      <div class="mono" style="font-size: 10px; color: #72786d; letter-spacing: .12em; text-transform: uppercase;">
+        PORTAL ANGGOTA RESMI
+      </div>
+      <h2 style="font: 800 24px 'Manrope', sans-serif; letter-spacing: -.05em; margin: 6px 0 4px;">
+        Halo, {{ request.user.first_name|default:request.user.username }} 👋
+      </h2>
+      <p style="font-size: 13px; color: var(--muted); margin: 0;">
+        {{ request.user.email }} · <span class="mono" style="font-size: 11px;">{{ today|date:"l, d F Y" }}</span>
+      </p>
     </div>
-    <i class="fa-solid fa-arrow-right" style="margin-left:auto; color:var(--text-muted);"></i>
-  </a>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="{% url 'home' %}#shop" class="btn btn-lime">
+      + Pesan Layanan Baru
+    </a>
+    <a href="{% url 'app:profile_pengguna' %}" class="btn btn-dark">
+      Edit Data Profil
+    </a>
+  </div>
+</div>
+
+<!-- METRIC STATS -->
+<div class="metric-grid">
+  <div class="metric">
+    <small>Total Pesanan Saya</small>
+    <strong style="font-size: 24px; margin: 10px 0 5px;">
+      {{ total_pesanan|default:"0" }}
+    </strong>
+    <span>Semua riwayat pemesanan</span>
+  </div>
+
+  <div class="metric">
+    <small>Sedang Diproses</small>
+    <strong style="font-size: 24px; margin: 10px 0 5px; color: #a77a32;">
+      {{ inprogress_pesanan|default:"0" }}
+    </strong>
+    <span>Pengerjaan tim kreatif</span>
+  </div>
+
+  <div class="metric">
+    <small>Pesanan Selesai</small>
+    <strong style="font-size: 24px; margin: 10px 0 5px; color: #4a875f;">
+      {{ completed_pesanan|default:"0" }}
+    </strong>
+    <span>Hasil pengerjaan selesai</span>
+  </div>
+
+  <div class="metric">
+    <small>Provinsi Kampus</small>
+    <strong style="font-size: 16px; margin: 10px 0 5px;">
+      {{ userdetail.provinsi_anggota.nama_provinsi|default:userdetail.provinsi_anggota|default:"Belum diisi" }}
+    </strong>
+    <span>Domisili terdaftar</span>
+  </div>
+</div>
+
+<!-- PESANAN SAYA (ORDERS LIST) -->
+<div class="dash-panel" style="margin-top: 10px;">
+  <div class="panel-head">
+    <div>
+      <h3>Riwayat Pesanan Layanan Saya</h3>
+      <span class="mono" style="font-size: 9px; color: var(--muted);">DAFTAR ORDER TERDATA DALAM SISTEM</span>
+    </div>
+    <a href="{% url 'home' %}#shop" class="btn btn-outline btn-sm">+ Pesan Lainnya ↗</a>
+  </div>
+
+  {% if user_pesanan %}
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Layanan</th>
+          <th>Bahan Video (Footage)</th>
+          <th>Estimasi</th>
+          <th>Tanggal</th>
+          <th>Total</th>
+          <th>Status Produksi</th>
+          <th>Pembayaran</th>
+          <th style="text-align: right;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pesanan in user_pesanan %}
+        <tr>
+          <td style="font-family: 'DM Mono', monospace; font-weight: 700; color: var(--ink);">
+            {{ pesanan.order_id }}
+          </td>
+          <td>
+            <div style="font-weight: 700; font-size: 13px; color: var(--ink);">
+              {{ pesanan.layanan_nama }}
+            </div>
+            {% if pesanan.catatan %}
+              <div style="font-size: 11px; color: var(--muted);">{{ pesanan.catatan }}</div>
+            {% endif %}
+          </td>
+          <td>
+            {% if pesanan.video_link %}
+              <a href="{{ pesanan.video_link }}" target="_blank" rel="noopener noreferrer" class="status done" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 11px;" title="{{ pesanan.video_link }}">
+                <i class="fa-solid fa-cloud"></i> Link Drive ↗
+              </a>
+            {% elif pesanan.video_file %}
+              <a href="{{ pesanan.video_file.url }}" download class="status done" style="background: #edf8ee; color: #2e7d32; border: 1px solid #c8e6c9; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 11px;" title="{{ pesanan.footage_filename }}">
+                <i class="fa-solid fa-file-video"></i> File Video ⬇
+              </a>
+            {% else %}
+              <a href="{% url 'payment_page' pesanan.clean_order_id %}" class="status" style="background: #fff8e1; color: #b78103; border: 1px dashed #ffe082; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700;" title="Klik untuk mengunggah bahan footage sekarang">
+                <i class="fa-solid fa-cloud-arrow-up"></i> + Unggah Footage
+              </a>
+            {% endif %}
+          </td>
+          <td style="font-size: 11px; color: var(--muted);">
+            {{ pesanan.durasi|default:"3–5 hari" }}
+          </td>
+          <td style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);">
+            {{ pesanan.created_at|date:"d M Y, H:i" }}
+          </td>
+          <td style="font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--ink);">
+            Rp{{ pesanan.total_harga }}
+          </td>
+          <td>
+            {% if pesanan.status == 'Completed' %}
+              <span class="status done">● Selesai</span>
+            {% elif pesanan.status == 'In progress' %}
+              <span class="status progress">● Sedang Diproses</span>
+            {% elif pesanan.status == 'Cancelled' %}
+              <span class="status cancel">● Dibatalkan</span>
+            {% else %}
+              <span class="status" style="background: #eef2e5; color: #556b2f;">● {{ pesanan.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if pesanan.payment_status == 'settlement' %}
+              <span class="status done" style="background: #edf8ee; color: #2e7d32; border: 1px solid #c8e6c9;">● Lunas</span>
+            {% elif pesanan.payment_status == 'pending' %}
+              <span class="status progress" style="background: #fff8e1; color: #b78103; border: 1px solid #ffe082;">● Menunggu Bayar</span>
+            {% elif pesanan.payment_status == 'cancel' or pesanan.payment_status == 'expire' %}
+              <span class="status cancel" style="background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;">● {{ pesanan.get_payment_status_display }}</span>
+            {% else %}
+              <span class="status" style="background: #f0f2ed; color: #555e50; border: 1px solid #dcdfd7;">● Belum Bayar</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            {% if pesanan.payment_status != 'settlement' %}
+              <a href="{% url 'payment_page' pesanan.clean_order_id %}" class="btn btn-lime btn-sm" style="padding: 6px 12px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-credit-card"></i> Bayar Sekarang ↗
+              </a>
+            {% else %}
+              <a href="{% url 'payment_page' pesanan.clean_order_id %}" class="btn btn-outline btn-sm" style="padding: 6px 10px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-receipt"></i> Rincian Nota
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding: 40px 20px;">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <p>Anda belum memiliki riwayat pesanan.</p>
+    <a href="{% url 'home' %}#shop" class="btn btn-dark btn-sm" style="margin-top: 10px;">
+      Jelajahi & Pesan Layanan Sekarang ↗
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- TWO COLUMN PANELS (ACADEMIC DETAILS & LINKS) -->
+<div style="display: grid; grid-template-columns: 1.2fr .8fr; gap: 16px; margin-top: 16px;">
+  <!-- LEFT: ACADEMIC DETAILS -->
+  <div class="dash-panel">
+    <div class="panel-head">
+      <h3>Informasi Data Anggota</h3>
+      <a href="{% url 'app:profile_pengguna' %}">Edit ↗</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="background: #fafbf8; padding: 16px; border-radius: 14px; border: 1px solid var(--line);">
+        <small class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Nomor Telepon</small>
+        <div style="font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 4px;">
+          {{ userdetail.telp|default:"Belum diisi" }}
+        </div>
+      </div>
+
+      <div style="background: #fafbf8; padding: 16px; border-radius: 14px; border: 1px solid var(--line);">
+        <small class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Jenis Kelamin</small>
+        <div style="font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 4px;">
+          {{ userdetail.gender|default:"Belum diisi" }}
+        </div>
+      </div>
+
+      <div style="background: #fafbf8; padding: 16px; border-radius: 14px; border: 1px solid var(--line);">
+        <small class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Jabatan Fungsional</small>
+        <div style="font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 4px;">
+          {{ userdetail.jafung|default:"Belum diisi" }}
+        </div>
+      </div>
+
+      <div style="background: #fafbf8; padding: 16px; border-radius: 14px; border: 1px solid var(--line);">
+        <small class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Bidang Keahlian</small>
+        <div style="font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 4px;">
+          {{ userdetail.bidang_keahlian|default:"Belum diisi" }}
+        </div>
+      </div>
+
+      <div style="grid-column: 1 / -1; background: #fafbf8; padding: 16px; border-radius: 14px; border: 1px solid var(--line);">
+        <small class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Alamat Instansi</small>
+        <div style="font-size: 13px; color: var(--ink); margin-top: 4px; line-height: 1.5;">
+          {{ userdetail.alamat|default:"Belum mengisi alamat domisili kampus" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: ACADEMIC LINKS & STATUS -->
+  <div class="dash-panel">
+    <div class="panel-head">
+      <h3>Tautan Publikasi & Riset</h3>
+      <span class="mono" style="font-size: 9px; color: var(--muted);">LINKS</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="padding: 12px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 12px; font-weight: 600;">SINTA ID</span>
+        {% if userdetail.link_sinta %}
+          <a href="{{ userdetail.link_sinta }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 10px;">
+            Kunjungi ↗
+          </a>
+        {% else %}
+          <span style="font-size: 10px; color: #b66d65;">Belum diatur</span>
+        {% endif %}
+      </div>
+
+      <div style="padding: 12px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 12px; font-weight: 600;">Scopus</span>
+        {% if userdetail.link_scopus %}
+          <a href="{{ userdetail.link_scopus }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 10px;">
+            Kunjungi ↗
+          </a>
+        {% else %}
+          <span style="font-size: 10px; color: var(--muted);">—</span>
+        {% endif %}
+      </div>
+
+      <div style="padding: 12px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 12px; font-weight: 600;">Google Scholar</span>
+        {% if userdetail.link_google_scholar %}
+          <a href="{{ userdetail.link_google_scholar }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 10px;">
+            Kunjungi ↗
+          </a>
+        {% else %}
+          <span style="font-size: 10px; color: var(--muted);">—</span>
+        {% endif %}
+      </div>
+
+      <div style="padding: 12px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 12px; font-weight: 600;">ORCID</span>
+        {% if userdetail.link_orcid %}
+          <a href="{{ userdetail.link_orcid }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 10px;">
+            Kunjungi ↗
+          </a>
+        {% else %}
+          <span style="font-size: 10px; color: var(--muted);">—</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

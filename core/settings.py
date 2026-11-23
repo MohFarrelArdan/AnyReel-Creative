@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -62,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.web_settings_context',
             ],
         },
     },
@@ -70,13 +72,62 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database — SQLite (local development)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database configuration
+# Supports Supabase PostgreSQL, MariaDB/MySQL (Docker), or SQLite (Local fallback)
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('SUPABASE_DB_URL')
+DB_HOST = os.environ.get('DB_HOST')
+
+if DATABASE_URL:
+    import urllib.parse
+    url = urllib.parse.urlparse(DATABASE_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': url.path.lstrip('/') or 'postgres',
+            'USER': url.username or 'postgres',
+            'PASSWORD': urllib.parse.unquote(url.password or ''),
+            'HOST': url.hostname,
+            'PORT': url.port or 5432,
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
     }
-}
+elif os.environ.get('DB_ENGINE') == 'postgresql' or os.environ.get('USE_SUPABASE') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('SUPABASE_DB_NAME', 'postgres'),
+            'USER': os.environ.get('SUPABASE_DB_USER', 'postgres.ccfcoutegeqfeccznqtq'),
+            'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', ''),
+            'HOST': os.environ.get('SUPABASE_DB_HOST', 'aws-0-ap-southeast-1.pooler.supabase.com'),
+            'PORT': os.environ.get('SUPABASE_DB_PORT', '6543'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
+elif DB_HOST:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', 'thesisstore'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'rootpassword'),
+            'HOST': DB_HOST,
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Auth settings
 LOGIN_URL = '/login/'
@@ -134,3 +185,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Session settings
 SESSION_COOKIE_AGE = 86400  # 1 day
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Midtrans Payment Gateway Configuration
+MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4')
+MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
+MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION', '0') == '1'
+
+# Supabase Configuration
+SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://ccfcoutegeqfeccznqtq.supabase.co')
+SUPABASE_PUBLISHABLE_KEY = os.environ.get('SUPABASE_PUBLISHABLE_KEY', '')
+SUPABASE_SECRET_KEY = os.environ.get('SUPABASE_SECRET_KEY', '')
+SUPABASE_JWKS_URL = os.environ.get('SUPABASE_JWKS_URL', 'https://ccfcoutegeqfeccznqtq.supabase.co/auth/v1/.well-known/jwks.json')

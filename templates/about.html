@@ -1,0 +1,290 @@
+{% extends 'public_base.html' %}
+
+{% block title %}About Us — FRAMEHAUS Creative Studio{% endblock %}
+
+{% block public_extra_styles %}
+.about-grid {
+  display: grid;
+  grid-template-columns: .95fr 1.05fr;
+  gap: 50px;
+  align-items: center;
+}
+.about-image {
+  height: 420px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #d9ddd0;
+  box-shadow: var(--shadow);
+}
+.about-image img { width: 100%; height: 100%; object-fit: cover; }
+.about-text h2 {
+  font: 800 38px/1.1 'Manrope', sans-serif;
+  letter-spacing: -.06em;
+  margin: 14px 0 16px;
+}
+.about-text p {
+  color: #73796e;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+.value-card {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+  transition: .22s;
+}
+.value-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.value-card strong {
+  font: 800 28px 'Manrope', sans-serif;
+  letter-spacing: -.05em;
+  color: #8a9a70;
+}
+.value-card h3 {
+  font: 700 17px 'Manrope', sans-serif;
+  margin: 16px 0 10px;
+}
+.value-card p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #80867a;
+  margin: 0;
+}
+.team-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+.team-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.35s var(--spring);
+  display: flex;
+  flex-direction: column;
+}
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px -10px rgba(18,24,18,0.12), 0 0 0 1px rgba(200,241,105,0.4);
+}
+.team-img-wrap {
+  position: relative;
+  height: 270px;
+  overflow: hidden;
+  background: #dfe3d7;
+}
+.team-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.65s var(--spring);
+}
+.team-card:hover .team-img-wrap img {
+  transform: scale(1.06);
+}
+.team-role-pill {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(23,27,23,.88);
+  backdrop-filter: blur(8px);
+  color: var(--lime);
+  font: 700 9px 'DM Mono', monospace;
+  letter-spacing: .08em;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+.team-info {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.team-info h4 {
+  font: 800 17px 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.team-info p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #798072;
+  margin: 0 0 16px;
+  flex: 1;
+}
+.team-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.team-tag {
+  background: #f1f2ec;
+  font-size: 10px;
+  font-weight: 600;
+  color: #555d4e;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.team-socials {
+  display: flex;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.team-socials a {
+  color: #8c9384;
+  font-size: 13px;
+  transition: color 0.2s, transform 0.2s;
+}
+.team-socials a:hover {
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+
+@media(max-width: 900px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .value-grid { grid-template-columns: 1fr; }
+  .team-strip { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block page_content %}
+<!-- ABOUT HERO -->
+<section class="wrap page-hero" data-reveal>
+  <div class="eyebrow">A LITTLE ABOUT US</div>
+  <h1>{{ web_setting.about_hero_title|default:"We make ideas move people."|linebreaksbr }}</h1>
+  <p>{{ web_setting.about_hero_desc|default:"FRAMEHAUS adalah creative video editing studio independen yang percaya bahwa setiap detik rekaman punya potensi untuk menjadi cerita visual yang kuat dan berkesan."|linebreaksbr }}</p>
+</section>
+
+<!-- MAIN STORY -->
+<section class="wrap section" style="padding-top: 10px;" data-reveal>
+  <div class="about-grid">
+    <div class="about-image" data-reveal="left">
+      <img src="{{ web_setting.get_about_story_img }}" alt="{{ web_setting.site_name }} Creative Studio" />
+    </div>
+    <div class="about-text" data-reveal="right">
+      <div class="eyebrow">OUR POINT OF VIEW</div>
+      <h2>{{ web_setting.about_story_heading|default:"It's not just about cutting clips. It's about creating a feeling." }}</h2>
+      <p>{{ web_setting.about_story_text1|default:"Kami menggabungkan storytelling, ritme visual, sound design, dan detail yang presisi untuk menghasilkan video yang bukan hanya terlihat bagus, tetapi juga terasa tepat di mata dan hati penonton."|linebreaksbr }}</p>
+      <p>{{ web_setting.about_story_text2|default:"Mulai dari kreator independen hingga brand yang sedang berkembang pesat, kami hadir sebagai partner kreatif yang membuat proses produksi post-editing lebih mudah, transparan, dan menyenangkan."|linebreaksbr }}</p>
+      <a href="{% url 'kontak' %}" class="btn btn-dark" style="margin-top: 10px;">
+        Hubungi Tim Kami ↗
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- THREE PILLARS / VALUES -->
+<section class="wrap section" style="padding-top: 20px;" data-reveal>
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">WHY {{ web_setting.site_name|upper }}</div>
+      <h2>Small details.<br/>Big difference.</h2>
+    </div>
+    <p>Prinsip kerja yang kami pegang dalam setiap proyek editing dari awal hingga delivery akhir.</p>
+  </div>
+
+  <div class="value-grid">
+    <div class="value-card">
+      <strong>01</strong>
+      <h3>Story first</h3>
+      <p>Setiap potongan dan transisi dimulai dari pesan inti yang ingin Anda sampaikan, bukan sekadar efek visual instan.</p>
+    </div>
+    <div class="value-card">
+      <strong>02</strong>
+      <h3>Clear process</h3>
+      <p>Brief, alur revisi, timeline pengerjaan, dan harga dibuat transparan agar Anda selalu tahu progres proyek.</p>
+    </div>
+    <div class="value-card">
+      <strong>03</strong>
+      <h3>Made with care</h3>
+      <p>Setiap frame diperhatikan dengan seksama. Mulai dari grading warna, sound design audio, hingga pacing ritme akhir.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STUDIO CULTURE & TEAM -->
+<section class="wrap section" style="padding-top: 20px;" data-reveal>
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">THE CREATIVE MINDS</div>
+      <h2>The team behind the screen.</h2>
+    </div>
+    <p>Para editor, colorist, audio designer, dan vfx artist berdedikasi tinggi yang siap mengubah footage Anda menjadi karya visual berkelas.</p>
+  </div>
+
+  <div class="team-strip">
+    {% for m in team_members %}
+    <div class="team-card" data-reveal>
+      <div class="team-img-wrap">
+        <img src="{{ m.get_photo_url }}" alt="{{ m.nama }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80'" />
+        <span class="team-role-pill">{{ m.role_badge|default:"CREATIVE TEAM"|upper }}</span>
+      </div>
+      <div class="team-info">
+        <h4>{{ m.nama }}</h4>
+        <span style="font: 700 11px 'DM Mono', monospace; color: var(--lime-dark); margin-bottom: 8px; text-transform: uppercase;">{{ m.role }}</span>
+        <p>{{ m.bio }}</p>
+        {% with skills=m.get_keahlian_list %}
+        {% if skills %}
+        <div class="team-tags">
+          {% for k in skills %}
+          <span class="team-tag">{{ k }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <div class="team-socials">
+          {% if m.social_instagram %}
+          <a href="{{ m.social_instagram }}" target="_blank" rel="noopener" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          {% endif %}
+          {% if m.social_linkedin %}
+          <a href="{{ m.social_linkedin }}" target="_blank" rel="noopener" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          {% endif %}
+          {% if m.social_behance %}
+          <a href="{{ m.social_behance }}" target="_blank" rel="noopener" title="Portofolio / Behance"><i class="fa-brands fa-behance"></i></a>
+          {% endif %}
+          {% if m.email %}
+          <a href="mailto:{{ m.email }}" title="Email"><i class="fa-regular fa-envelope"></i></a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; padding: 40px; text-align: center; background: #fff; border: 1px dashed var(--line); border-radius: 20px;">
+      <p style="color: #798072; font-size: 14px; margin: 0;">Belum ada data anggota tim yang ditampilkan. Silakan tambahkan anggota tim baru melalui <a href="{% url 'admin_team_list' %}" style="color: var(--ink); font-weight: 700; text-decoration: underline;">Dashboard Tim</a>.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<section class="wrap section" style="padding-top: 20px; padding-bottom: 20px;">
+  <div class="dark-cta">
+    <div>
+      <div class="eyebrow" style="color: #aab59e;">READY TO COLLABORATE?</div>
+      <h2>Let's create something remarkable together.</h2>
+      <p>Mulai konsultasikan proyek video komersial atau konten sosial media Anda hari ini.</p>
+    </div>
+    <a href="{% url 'shop' %}" class="btn btn-lime">
+      Pilih Layanan Kami
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+        <path d="M5 12h14m-6-6 6 6-6 6"/>
+      </svg>
+    </a>
+  </div>
+</section>
+{% endblock %}

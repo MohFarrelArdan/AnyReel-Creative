@@ -1,0 +1,148 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}{{ title }} — FRAMEHAUS Management{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
+</a>
+<a href="{% url 'app:service_list' %}" class="active">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
+</a>
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}{% if action == 'create' %}Tambahkan paket atau layanan baru yang langsung muncul di katalog frontend.{% else %}Perbarui data paket layanan: {{ service.nama }}.{% endif %}{% endblock %}
+
+{% block page_body %}
+<div style="max-width: 860px;">
+  <div class="form-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line);">
+      <div>
+        <h2 style="font: 800 20px 'Manrope', sans-serif; margin: 0; color: var(--ink);">
+          {% if action == 'create' %}Form Layanan Baru{% else %}Edit Layanan: {{ service.nama }}{% endif %}
+        </h2>
+        <p style="font-size: 12px; color: var(--muted); margin: 4px 0 0;">
+          Semua perubahan langsung tersimpan ke basis data dan ditampilkan di frontend.
+        </p>
+      </div>
+      <a href="{% url 'app:service_list' %}" class="btn btn-outline" style="font-size: 11px; padding: 8px 14px;">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
+      </a>
+    </div>
+
+    <form method="POST" action="" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="form-grid">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="nama">Nama Layanan <span style="color: #d9534f;">*</span></label>
+          <input type="text" id="nama" name="nama" value="{{ service.nama|default:'' }}" required placeholder="Contoh: Short-form Reels / TikTok / Shorts" />
+        </div>
+
+        <div class="field">
+          <label for="kategori">Kategori Layanan <span style="color: #d9534f;">*</span></label>
+          <select id="kategori" name="kategori" required>
+            {% for code, label in categories %}
+              <option value="{{ code }}" {% if service.kategori == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="tag">Badge / Tag Promo</label>
+          <input type="text" id="tag" name="tag" value="{{ service.tag|default:'Populer' }}" placeholder="Contoh: Populer, Best Value, Signature" />
+        </div>
+
+        <div class="field">
+          <label for="harga">Harga (IDR) <span style="color: #d9534f;">*</span></label>
+          <input type="text" inputmode="numeric" id="harga" name="harga" value="{{ service.harga|default:'350000' }}" required placeholder="Contoh: 10000, 350000, atau 1.500.000" oninput="updateRupiahPreview(this.value)" />
+          <span class="field-hint">
+            Bebas masukkan nominal apa pun (angka polos atau dengan titik). Format: <strong>Rp <span id="rupiahPreview" style="color: var(--ink);">{{ service.harga|default:'350000' }}</span></strong>
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="durasi">Estimasi Durasi Pengerjaan</label>
+          <input type="text" id="durasi" name="durasi" value="{{ service.durasi|default:'1–2 Hari' }}" placeholder="Contoh: 1–2 Hari, 3–5 Hari" />
+        </div>
+
+        <div class="field">
+          <label for="foto">Upload Gambar Cover (File)</label>
+          <input type="file" id="foto" name="foto" accept="image/*" />
+          {% if service.foto %}
+            <div style="margin-top: 8px;">
+              <img src="{{ service.foto.url }}" alt="Cover" style="height: 60px; border-radius: 8px; object-fit: cover;" />
+            </div>
+          {% endif %}
+          <span class="field-hint">Upload file gambar dari komputer (opsional)</span>
+        </div>
+
+        <div class="field">
+          <label for="gambar">Atau URL Gambar Cover / Banner</label>
+          <input type="url" id="gambar" name="gambar" value="{{ service.gambar|default:'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80' }}" placeholder="https://..." />
+          <div style="margin-top: 8px;">
+            <img src="{{ service.get_image_url }}" alt="Preview" style="height: 60px; border-radius: 8px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'" />
+          </div>
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="deskripsi">Deskripsi Layanan & Spesifikasi <span style="color: #d9534f;">*</span></label>
+          <textarea id="deskripsi" name="deskripsi" rows="4" required placeholder="Jelaskan apa yang didapatkan klien, fitur editing, sound design, revisi, dll.">{{ service.deskripsi|default:'' }}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="urutan">Nomor Urutan Tampil</label>
+          <input type="number" id="urutan" name="urutan" value="{{ service.urutan|default:'0' }}" />
+          <span class="field-hint">Urutan lebih kecil muncul lebih dulu di katalog</span>
+        </div>
+
+        <div class="field" style="display: flex; align-items: center; gap: 10px; margin-top: 25px;">
+          <input type="checkbox" id="aktif" name="aktif" {% if service.aktif or action == 'create' %}checked{% endif %} style="width: 20px; height: 20px; accent-color: var(--dark);" />
+          <label for="aktif" style="margin: 0; font-size: 13px; font-weight: 600; cursor: pointer;">
+            Tampilkan di Website (Status Aktif)
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line);">
+        <a href="{% url 'app:service_list' %}" class="btn btn-outline" style="padding: 12px 22px;">Batal</a>
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px;">
+          <i class="fa-solid fa-check"></i> Simpan Layanan ke Database
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function updateRupiahPreview(val) {
+    const num = parseInt(String(val).replace(/\D/g, '')) || 0;
+    const previewEl = document.getElementById('rupiahPreview');
+    if (previewEl) {
+      previewEl.textContent = new Intl.NumberFormat('id-ID').format(num);
+    }
+  }
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('harga');
+    if (el) updateRupiahPreview(el.value);
+  });
+</script>
+{% endblock %}

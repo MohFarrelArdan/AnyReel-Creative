@@ -1,107 +1,142 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Manajemen User — Sistem Manajemen{% endblock %}
-{% block role_label %}Super Admin{% endblock %}
+{% block title %}Manajemen Pengguna — FRAMEHAUS Management{% endblock %}
 {% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
 
 {% block sidebar_nav %}
-<p class="nav-section-label">Menu</p>
-<a href="{% url 'app:dashboard' %}" class="nav-item">
-  <i class="fa-solid fa-chart-pie"></i> Dashboard
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
 </a>
-<a href="{% url 'app:user_list' %}" class="nav-item active">
-  <i class="fa-solid fa-users"></i> Manajemen User
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
 </a>
-<p class="nav-section-label">Akun</p>
-<a href="{% url 'app:profile_admin' %}" class="nav-item">
-  <i class="fa-solid fa-circle-user"></i> Profil Admin
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}" class="active">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
 </a>
 {% endblock %}
 
-{% block page_title %}Manajemen User{% endblock %}
-{% block page_subtitle %}{{ total }} pengguna terdaftar{% endblock %}
+{% block page_title %}Manajemen Pengguna{% endblock %}
+{% block page_subtitle %}Total {{ total }} anggota terdaftar dalam basis data sistem.{% endblock %}
 
 {% block page_body %}
-<div class="table-card">
-  <div class="table-card-header">
-    <div class="table-card-title">
-      <i class="fa-solid fa-users" style="color: var(--primary); margin-right: 8px;"></i>
-      Daftar Pengguna
+<div class="dash-panel">
+  <div class="panel-head" style="flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h3>Direktori Anggota</h3>
+      <span class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">
+        DAFTAR SEMUA PENGGUNA TERVERIFIKASI
+      </span>
     </div>
+
     <form method="GET" action="">
-      <div class="search-wrapper">
+      <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" name="search" class="search-input" placeholder="Cari nama atau email…" value="{{ search }}" id="search-input" />
+        <input type="text" name="search" id="search-input" placeholder="Cari nama atau email…" value="{{ search }}" autocomplete="off" />
+        {% if search %}
+          <a href="{% url 'app:user_list' %}" style="color: var(--muted); font-size: 11px;" title="Reset"><i class="fa-solid fa-xmark"></i></a>
+        {% endif %}
       </div>
     </form>
   </div>
 
   {% if user_data %}
-  <div class="table-responsive">
-    <table>
+  <div class="table-scroll">
+    <table class="data-table">
       <thead>
         <tr>
-          <th>#</th>
+          <th style="width: 40px;">#</th>
           <th>Pengguna</th>
           <th>Bergabung</th>
           <th>Telepon</th>
-          <th>Status</th>
-          <th>Profil</th>
-          <th>Aksi</th>
+          <th>Status Akun</th>
+          <th>Kelengkapan</th>
+          <th style="text-align: right;">Tindakan</th>
         </tr>
       </thead>
       <tbody>
         {% for item in user_data %}
         <tr>
-          <td style="color: var(--text-muted); font-size: 13px;">{{ forloop.counter }}</td>
+          <td style="color: var(--muted); font-family: 'DM Mono', monospace;">{{ forloop.counter }}</td>
           <td>
             <div class="user-cell">
               {% if item.pengguna and item.pengguna.photo %}
-                <img src="{{ item.pengguna.photo.url }}" alt="" class="user-avatar" />
+                <img src="{{ item.pengguna.photo.url }}" alt="Avatar" class="user-cell-avatar" />
               {% else %}
-                <div class="user-avatar-placeholder">{{ item.user.first_name|first|upper }}</div>
+                <div class="user-cell-avatar-placeholder">{{ item.user.first_name|default:item.user.username|first|upper }}</div>
               {% endif %}
               <div>
-                <div class="user-cell-name">{{ item.user.first_name }}</div>
+                <div class="user-cell-name">{{ item.user.first_name|default:item.user.username }}</div>
                 <div class="user-cell-email">{{ item.user.email }}</div>
               </div>
             </div>
           </td>
-          <td style="color: var(--text-muted); font-size: 13px;">{{ item.user.date_joined|date:"d M Y" }}</td>
-          <td style="color: var(--text-muted);">
-            {% if item.pengguna %}{{ item.pengguna.telp|default:"—" }}{% else %}—{% endif %}
+          <td style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);">
+            {{ item.user.date_joined|date:"d M Y" }}
+          </td>
+          <td style="font-size: 11px;">
+            {% if item.pengguna and item.pengguna.telp %}
+              {{ item.pengguna.telp }}
+            {% else %}
+              <span style="color: #b3b8ad;">—</span>
+            {% endif %}
           </td>
           <td>
             {% if item.user.is_active %}
-              <span class="badge badge-success"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Aktif</span>
+              <span class="status done">● Aktif</span>
             {% else %}
-              <span class="badge badge-danger"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Nonaktif</span>
+              <span class="status cancel">● Nonaktif</span>
             {% endif %}
           </td>
           <td>
-            {% if item.pengguna %}
-              <span class="badge badge-primary"><i class="fa-solid fa-check"></i> Lengkap</span>
+            {% if item.pengguna and item.pengguna.photo and item.pengguna.gender %}
+              <span class="badge badge-success"><i class="fa-solid fa-circle"></i> Lengkap</span>
             {% else %}
-              <span class="badge badge-warning"><i class="fa-solid fa-clock"></i> Belum</span>
+              <span class="badge badge-warning"><i class="fa-solid fa-circle"></i> Belum Lengkap</span>
             {% endif %}
           </td>
-          <td>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <a href="{% url 'app:user_edit' item.user.pk %}" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-pen-to-square"></i> Edit
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px; align-items: center;">
+              <a href="{% url 'app:user_edit' item.user.pk %}" class="btn btn-outline btn-sm" title="Edit data pengguna">
+                <i class="fa-solid fa-pen"></i> Edit
               </a>
-              <form method="POST" action="{% url 'app:user_toggle_active' item.user.pk %}" style="display:inline;">
+
+              <form method="POST" action="{% url 'app:user_toggle_active' item.user.pk %}" style="display: inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-sm {% if item.user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                <button type="submit" class="btn btn-sm {% if item.user.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{% if item.user.is_active %}Nonaktifkan akun{% else %}Aktifkan akun{% endif %}">
                   {% if item.user.is_active %}
-                    <i class="fa-solid fa-ban"></i> Nonaktifkan
+                    <i class="fa-solid fa-ban"></i>
                   {% else %}
-                    <i class="fa-solid fa-check"></i> Aktifkan
+                    <i class="fa-solid fa-check"></i>
                   {% endif %}
                 </button>
               </form>
-              <button type="button" class="btn btn-danger btn-sm"
-                onclick="openDeleteModal({{ item.user.pk }}, '{{ item.user.first_name }}')">
+
+              <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ item.user.pk }}', '{{ item.user.first_name|default:item.user.username|escapejs }}')" title="Hapus pengguna">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
@@ -114,21 +149,36 @@
   {% else %}
   <div class="empty-state">
     <i class="fa-solid fa-users-slash"></i>
-    <p>{% if search %}Tidak ada pengguna yang cocok dengan pencarian "<strong>{{ search }}</strong>"{% else %}Belum ada pengguna terdaftar{% endif %}</p>
+    <p>
+      {% if search %}
+        Tidak ada data yang cocok dengan pencarian "<strong>{{ search }}</strong>".
+      {% else %}
+        Belum ada anggota terdaftar dalam basis data.
+      {% endif %}
+    </p>
   </div>
   {% endif %}
 </div>
 
-<!-- Delete Modal -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal">
-    <div class="modal-title" style="color: #f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Hapus User</div>
-    <p class="modal-body" id="deleteModalBody">Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.</p>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-ghost" onclick="closeDeleteModal()">Batal</button>
-      <form method="POST" id="deleteForm">
+<!-- DELETE MODAL DIALOG -->
+<div class="modal-overlay" id="deleteModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <div style="display: flex; align-items: center; gap: 10px; color: #b66d65; margin-bottom: 12px;">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size: 20px;"></i>
+      <h3 style="margin: 0; color: #b66d65;">Konfirmasi Penghapusan</h3>
+    </div>
+    <p id="deleteModalBody">
+      Apakah Anda yakin ingin menghapus akun pengguna ini? Data yang telah dihapus tidak dapat dipulihkan kembali.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">
+        Batal
+      </button>
+      <form method="POST" id="deleteForm" style="display: inline;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Hapus</button>
+        <button type="submit" class="btn btn-dark" style="background: #a84b4b; border-color: #a84b4b; color: #fff;">
+          <i class="fa-solid fa-trash"></i> Hapus Permanen
+        </button>
       </form>
     </div>
   </div>
@@ -136,17 +186,34 @@
 
 <script>
 function openDeleteModal(userId, userName) {
-  document.getElementById('deleteModalBody').innerHTML = `Apakah Anda yakin ingin menghapus user <strong>${userName}</strong>? Tindakan ini tidak dapat dibatalkan.`;
-  document.getElementById('deleteForm').action = `/app/admin/users/${userId}/delete`;
-  document.getElementById('deleteModal').classList.add('show');
+  const modal = document.getElementById('deleteModal');
+  const body = document.getElementById('deleteModalBody');
+  const form = document.getElementById('deleteForm');
+  body.innerHTML = `Apakah Anda yakin ingin menghapus akun <strong>${userName}</strong> secara permanen dari basis data?`;
+  form.action = `/app/admin/users/${userId}/delete`;
+  modal.classList.add('show');
 }
+
 function closeDeleteModal() {
   document.getElementById('deleteModal').classList.remove('show');
 }
-// live search submit
-document.getElementById('search-input').addEventListener('input', function() {
-  clearTimeout(this._t);
-  this._t = setTimeout(() => this.closest('form').submit(), 500);
-});
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'deleteModal') {
+    closeDeleteModal();
+  }
+}
+
+// Live search with debounce
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+  let timer;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      this.closest('form').submit();
+    }, 500);
+  });
+}
 </script>
 {% endblock %}

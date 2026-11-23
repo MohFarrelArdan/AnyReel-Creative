@@ -1,0 +1,205 @@
+{% extends 'public_base.html' %}
+
+{% block title %}Status Pembayaran — FRAMEHAUS{% endblock %}
+
+{% block public_extra_styles %}
+.finish-wrap {
+  padding: 60px 0 100px;
+  display: flex;
+  justify-content: center;
+}
+.finish-card {
+  max-width: 620px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 20px 48px rgba(18,24,18,0.08);
+}
+.finish-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin-bottom: 24px;
+}
+.finish-icon.success {
+  background: #f6ffed;
+  color: #389e0d;
+  border: 2px solid #b7eb8f;
+}
+.finish-icon.pending {
+  background: #fffbe6;
+  color: #d46b08;
+  border: 2px solid #ffe58f;
+}
+.finish-icon.failed {
+  background: #fff1f0;
+  color: #cf1322;
+  border: 2px solid #ffa39e;
+}
+
+.finish-title {
+  font: 800 clamp(24px, 3.5vw, 32px)/1.15 'Manrope', sans-serif;
+  letter-spacing: -0.04em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.finish-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 auto 32px;
+  max-width: 460px;
+}
+
+.receipt-box {
+  background: #fafbf8;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px dashed #e5e9df;
+  font-size: 13px;
+}
+.receipt-row:last-child {
+  border-bottom: none;
+}
+.receipt-lbl {
+  color: var(--muted);
+}
+.receipt-val {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.finish-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-finish-primary {
+  background: var(--dark);
+  color: #fff;
+  font: 700 14px 'Manrope', sans-serif;
+  padding: 14px 26px;
+  border-radius: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.btn-finish-primary:hover {
+  background: #2a2e28;
+  transform: translateY(-2px);
+}
+.btn-finish-secondary {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font: 700 14px 'Manrope', sans-serif;
+  padding: 14px 24px;
+  border-radius: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.btn-finish-secondary:hover {
+  background: #f4f5f1;
+}
+{% endblock %}
+
+{% block page_content %}
+<div class="wrap finish-wrap">
+  <div class="finish-card">
+    {% if pesanan and pesanan.payment_status == 'settlement' or transaction_status == 'settlement' %}
+      <div class="finish-icon success">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h1 class="finish-title">Pembayaran Berhasil!</h1>
+      <p class="finish-desc">
+        Terima kasih! Pembayaran untuk pesanan Anda telah berhasil diterima dan diverifikasi oleh sistem gateway Midtrans.
+      </p>
+    {% elif pesanan and pesanan.payment_status == 'pending' or transaction_status == 'pending' %}
+      <div class="finish-icon pending">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+      <h1 class="finish-title">Menunggu Pembayaran</h1>
+      <p class="finish-desc">
+        Pesanan Anda telah dicatat. Mohon selesaikan transfer sesuai dengan nomor Virtual Account atau instruksi pembayaran yang diberikan.
+      </p>
+    {% else %}
+      <div class="finish-icon failed">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </div>
+      <h1 class="finish-title">Status Transaksi</h1>
+      <p class="finish-desc">
+        Status pembayaran pesanan Anda sedang dalam proses atau belum berhasil diverifikasi.
+      </p>
+    {% endif %}
+
+    {% if pesanan %}
+    <div class="receipt-box">
+      <div class="receipt-row">
+        <span class="receipt-lbl">Nomor Order</span>
+        <span class="receipt-val" style="font-family: 'DM Mono', monospace;">{{ pesanan.order_id }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-lbl">Layanan</span>
+        <span class="receipt-val">{{ pesanan.layanan_nama }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-lbl">Status Pembayaran</span>
+        <span class="receipt-val" style="font-family: 'DM Mono', monospace; text-transform: uppercase;">
+          {{ pesanan.get_payment_status_display }}
+        </span>
+      </div>
+      {% if pesanan.payment_type %}
+      <div class="receipt-row">
+        <span class="receipt-lbl">Metode Pembayaran</span>
+        <span class="receipt-val" style="text-transform: uppercase;">{{ pesanan.payment_type }}</span>
+      </div>
+      {% endif %}
+      <div class="receipt-row">
+        <span class="receipt-lbl">Total Tagihan</span>
+        <span class="receipt-val" style="color: #4a875f; font-size: 15px;">
+          Rp {{ pesanan.total_harga|floatformat:0 }}
+        </span>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="finish-actions">
+      <a href="{% url 'app:dashboard' %}" class="btn-finish-primary">
+        <i class="fa-solid fa-chart-pie"></i>
+        Buka Dashboard Saya
+      </a>
+      {% if pesanan and pesanan.payment_status != 'settlement' %}
+        <a href="{% url 'payment_page' pesanan.clean_order_id %}" class="btn-finish-secondary">
+          <i class="fa-solid fa-credit-card"></i>
+          Halaman Pembayaran
+        </a>
+      {% endif %}
+      <a href="{% url 'shop' %}" class="btn-finish-secondary">
+        <i class="fa-solid fa-bag-shopping"></i>
+        Katalog Layanan
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

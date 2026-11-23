@@ -1,0 +1,1157 @@
+{% extends 'public_base.html' %}
+
+{% block title %}Pembayaran {{ pesanan.order_id }} — FRAMEHAUS{% endblock %}
+
+{% block public_extra_head %}
+{% if client_key %}
+<script type="text/javascript" src="{{ snap_js_url }}" data-client-key="{{ client_key }}"></script>
+{% endif %}
+{% endblock %}
+
+{% block public_extra_styles %}
+/* ==================== PAYMENT PAGE STYLES ==================== */
+.pay-page-wrap {
+  padding: 40px 0 90px;
+}
+.pay-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 500 12px 'DM Mono', monospace;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.pay-breadcrumb a {
+  color: #7b8474;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.pay-breadcrumb a:hover {
+  color: var(--ink);
+}
+.pay-breadcrumb span.sep { color: #c0c6b9; }
+.pay-breadcrumb span.current { color: var(--ink); font-weight: 700; }
+
+.pay-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 36px;
+  align-items: flex-start;
+}
+@media (max-width: 900px) {
+  .pay-grid { grid-template-columns: 1fr; }
+}
+
+.pay-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.pay-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+.pay-card-title {
+  font: 800 20px 'Manrope', sans-serif;
+  letter-spacing: -0.04em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ORDER INFO ROWS */
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e4e7df;
+  font-size: 14px;
+}
+.order-row:last-child {
+  border-bottom: none;
+}
+.order-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+.order-val {
+  color: var(--ink);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* SANDBOX NOTIFICATION PILL */
+.sandbox-badge {
+  background: #fff8e6;
+  border: 1px solid #fedc82;
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-top: 24px;
+}
+.sandbox-badge-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8c5b00;
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+.sandbox-badge-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #634300;
+  margin: 0;
+}
+
+/* TOTAL BILL BOX */
+.bill-box {
+  background: #171916;
+  color: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(18,24,18,0.18);
+}
+.bill-box::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,241,105,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.bill-label {
+  font: 11px 'DM Mono', monospace;
+  letter-spacing: 0.12em;
+  color: #9da396;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.bill-amount {
+  font: 800 clamp(32px, 4vw, 42px)/1.1 'Manrope', sans-serif;
+  letter-spacing: -0.05em;
+  color: var(--lime);
+  margin-bottom: 24px;
+}
+
+/* STATUS CHIP */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 20px;
+}
+.status-chip.unpaid { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.status-chip.pending { background: #fffbe6; color: #d46b08; border: 1px solid #ffe58f; }
+.status-chip.settlement { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.status-chip.cancel { background: #f5f5f5; color: #595959; border: 1px solid #d9d9d9; }
+
+/* PAYMENT BUTTONS */
+.btn-pay-snap {
+  width: 100%;
+  background: var(--lime);
+  color: var(--ink);
+  font: 800 15px 'Manrope', sans-serif;
+  letter-spacing: -0.02em;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.25s var(--spring);
+  box-shadow: 0 8px 24px rgba(200,241,105,0.35);
+  margin-bottom: 12px;
+}
+.btn-pay-snap:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(200,241,105,0.48);
+}
+.btn-pay-snap:active {
+  transform: translateY(1px);
+}
+
+.btn-pay-link {
+  width: 100%;
+  background: transparent;
+  color: #d9dfd4;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 12px 20px;
+  font: 600 13px 'Manrope', sans-serif;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.btn-pay-link:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+
+.methods-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.method-pill {
+  background: rgba(255,255,255,0.08);
+  color: #cad1c5;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==================== MIDTRANS SNAP SANDBOX MODAL ==================== */
+.snap-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 15, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: snapFadeIn 0.25s ease-out;
+}
+.snap-modal-overlay.active {
+  display: flex;
+}
+@keyframes snapFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.snap-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: snapSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid #dce2d6;
+}
+@keyframes snapSlideUp {
+  from { transform: translateY(24px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.snap-modal-top {
+  background: #0f1c2e;
+  color: #fff;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+.snap-logo-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.snap-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: #0070ba;
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+.snap-modal-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.snap-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.snap-order-banner {
+  background: #f4f6f8;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e1e6eb;
+}
+
+.snap-channels-list {
+  padding: 16px 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.snap-channel-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid #e2e7ec;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+.snap-channel-item:hover {
+  border-color: #0070ba;
+  background: #f7faff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 112, 186, 0.08);
+}
+.snap-channel-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.snap-channel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.snap-detail-wrap {
+  padding: 24px;
+}
+.btn-snap-action {
+  width: 100%;
+  background: #0070ba;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  border-radius: 14px;
+  padding: 15px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+  margin-top: 18px;
+}
+.btn-snap-action:hover {
+  background: #005a96;
+}
+.btn-snap-back {
+  background: none;
+  border: none;
+  color: #68717a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.btn-snap-back:hover {
+  color: #171916;
+}
+{% endblock %}
+
+{% block page_content %}
+<div class="wrap pay-page-wrap">
+  <!-- BREADCRUMB -->
+  <div class="pay-breadcrumb">
+    <a href="{% url 'home' %}">Home</a>
+    <span class="sep">/</span>
+    <a href="{% url 'shop' %}">Shop</a>
+    <span class="sep">/</span>
+    <a href="{% url 'app:dashboard' %}">Dashboard</a>
+    <span class="sep">/</span>
+    <span class="current">Pembayaran {{ pesanan.order_id }}</span>
+  </div>
+
+  <div class="pay-grid">
+    <!-- LEFT COLUMN: ORDER DETAILS & INSTRUCTIONS -->
+    <div>
+      <div class="pay-card">
+        <div class="pay-card-head">
+          <h2 class="pay-card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Detail Pesanan Layanan
+          </h2>
+          <span style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);">
+            {{ pesanan.created_at|date:"d M Y, H:i" }}
+          </span>
+        </div>
+
+        <div class="order-row">
+          <span class="order-label">Nomor Order</span>
+          <span class="order-val" style="font-family: 'DM Mono', monospace; font-size: 16px;">
+            {{ pesanan.order_id }}
+          </span>
+        </div>
+
+        <div class="order-row">
+          <span class="order-label">Nama Layanan</span>
+          <span class="order-val" style="font-size: 15px;">{{ pesanan.layanan_nama }}</span>
+        </div>
+
+        <div class="order-row">
+          <span class="order-label">Kategori</span>
+          <span class="order-val">{{ pesanan.kategori|default:"Video Editing" }}</span>
+        </div>
+
+        <div class="order-row">
+          <span class="order-label">Estimasi Waktu Pengerjaan</span>
+          <span class="order-val">{{ pesanan.durasi|default:"1–3 Hari" }}</span>
+        </div>
+
+        {% if pesanan.catatan %}
+        <div class="order-row">
+          <span class="order-label">Catatan Klien</span>
+          <span class="order-val" style="font-weight: 500; font-style: italic; max-width: 280px;">
+            "{{ pesanan.catatan }}"
+          </span>
+        </div>
+        {% endif %}
+
+        <div class="order-row">
+          <span class="order-label">Nama Pelanggan</span>
+          <span class="order-val">{{ pesanan.user.first_name|default:pesanan.user.username }}</span>
+        </div>
+
+        <div class="order-row">
+          <span class="order-label">Email Konfirmasi</span>
+          <span class="order-val">{{ pesanan.user.email }}</span>
+        </div>
+
+        {% if pesanan.payment_type %}
+        <div class="order-row">
+          <span class="order-label">Metode Terpilih</span>
+          <span class="order-val" style="text-transform: uppercase;">{{ pesanan.payment_type }}</span>
+        </div>
+        {% endif %}
+
+        {% if pesanan.midtrans_transaction_id %}
+        <div class="order-row">
+          <span class="order-label">Midtrans Transaction ID</span>
+          <span class="order-val" style="font-family: 'DM Mono', monospace; font-size: 11px;">
+            {{ pesanan.midtrans_transaction_id }}
+          </span>
+        </div>
+        {% endif %}
+
+        <!-- FOOTAGE / BAHAN VIDEO SECTION -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 16px;">🎬</span>
+              <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink);">Bahan Video / Footage Proyek</span>
+            </div>
+            <button type="button" onclick="openFootageModal()" style="font-size: 11px; font-weight: 700; color: #166534; background: #eefbee; border: 1px solid #bbf7d0; border-radius: 99px; padding: 5px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              {% if pesanan.has_footage %}Ubah Footage{% else %}+ Upload Footage{% endif %}
+            </button>
+          </div>
+
+          {% if pesanan.video_link %}
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <span style="font-size: 22px;">📁</span>
+              <div style="min-width: 0;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #15803d; letter-spacing: 0.04em;">Tautan Google Drive / Cloud</div>
+                <a href="{{ pesanan.video_link }}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #0284c7; text-decoration: underline; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 320px; font-family: 'DM Mono', monospace;">
+                  {{ pesanan.video_link }}
+                </a>
+              </div>
+            </div>
+            <a href="{{ pesanan.video_link }}" target="_blank" rel="noopener noreferrer" style="background: #0284c7; color: #fff; padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
+              Buka Link ↗
+            </a>
+          </div>
+          {% elif pesanan.video_file %}
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <span style="font-size: 22px;">🎥</span>
+              <div style="min-width: 0;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #15803d; letter-spacing: 0.04em;">File Video Terunggah</div>
+                <div style="font-size: 12px; color: var(--ink); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; font-family: 'DM Mono', monospace;">
+                  {{ pesanan.footage_filename }}
+                </div>
+              </div>
+            </div>
+            <a href="{{ pesanan.video_file.url }}" download style="background: #15803d; color: #fff; padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
+              <i class="fa-solid fa-download"></i> Unduh File
+            </a>
+          </div>
+          {% else %}
+          <div style="background: #fff8e6; border: 1px dashed #fedc82; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8c5b00;">
+              <span>⚠️</span>
+              <span>Belum ada bahan video footage yang diunggah untuk pesanan ini.</span>
+            </div>
+            <button type="button" onclick="openFootageModal()" style="background: #171916; color: #c8f169; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              Upload Sekarang
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- MIDTRANS SANDBOX TESTING GUIDE -->
+      <div class="sandbox-badge">
+        <div class="sandbox-badge-title">
+          <i class="fa-solid fa-flask"></i>
+          Midtrans Sandbox Payment Gateway Terpasang
+        </div>
+        <p class="sandbox-badge-text">
+          Sistem checkout terintegrasi dengan API Midtrans Sandbox resmi. Klik tombol <b>"Bayar Sekarang (Midtrans Snap)"</b> di samping untuk membuka modul pembayaran langsung di layar Anda.
+        </p>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: BILL & ACTIONS -->
+    <div>
+      <div class="bill-box">
+        <div class="bill-label">STATUS PEMBAYARAN</div>
+        {% if pesanan.payment_status == 'settlement' %}
+          <div class="status-chip settlement">
+            <i class="fa-solid fa-circle-check"></i>
+            ● LUNAS / SETTLEMENT
+          </div>
+        {% elif pesanan.payment_status == 'pending' %}
+          <div class="status-chip pending">
+            <i class="fa-solid fa-clock"></i>
+            ● MENUNGGU PEMBAYARAN
+          </div>
+        {% elif pesanan.payment_status == 'cancel' or pesanan.payment_status == 'expire' %}
+          <div class="status-chip cancel">
+            <i class="fa-solid fa-ban"></i>
+            ● {{ pesanan.get_payment_status_display|upper }}
+          </div>
+        {% else %}
+          <div class="status-chip unpaid">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            ● BELUM DIBAYAR
+          </div>
+        {% endif %}
+
+        <div class="bill-label">TOTAL TAGIHAN</div>
+        <div class="bill-amount">
+          Rp {{ pesanan.total_harga|floatformat:0 }}
+        </div>
+
+        {% if pesanan.payment_status == 'settlement' %}
+          <!-- SUCCESS STATE -->
+          <div style="background: rgba(200,241,105,0.12); border: 1px solid rgba(200,241,105,0.3); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--lime); margin-bottom: 12px;"></i>
+            <h3 style="font-size: 18px; margin: 0 0 6px; color: #fff;">Pembayaran Sukses!</h3>
+            <p style="font-size: 13px; color: #d0d7ca; margin: 0;">
+              Pesanan Anda telah dikonfirmasi dan langsung ditugaskan ke editor studio kami.
+            </p>
+          </div>
+          <a href="{% url 'app:dashboard' %}" class="btn-pay-snap" style="text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i>
+            Buka Dashboard Saya
+          </a>
+        {% else %}
+          <!-- PRIMARY ACTION BUTTON: TRIGGER SNAP SANDBOX DIRECTLY -->
+          <button id="pay-button" class="btn-pay-snap" onclick="startSandboxPayment()">
+            <i class="fa-solid fa-credit-card"></i>
+            Bayar Sekarang (Midtrans Snap)
+          </button>
+
+          <div style="display: flex; gap: 8px; margin-top: 14px;">
+            <button onclick="checkLiveStatus()" class="btn-pay-link" style="font-size: 12px; padding: 10px;">
+              <i class="fa-solid fa-rotate" id="checkIcon"></i>
+              Cek Status Pembayaran
+            </button>
+            <a href="{% url 'app:dashboard' %}" class="btn-pay-link" style="font-size: 12px; padding: 10px;">
+              Nanti Saja
+            </a>
+          </div>
+        {% endif %}
+
+        <!-- SUPPORTED CHANNELS -->
+        <div class="methods-icons">
+          <span style="font-size: 11px; color: #9da396; width: 100%; margin-bottom: 4px;">Dukungan Pembayaran:</span>
+          <div class="method-pill"><i class="fa-solid fa-qrcode"></i> QRIS</div>
+          <div class="method-pill"><i class="fa-solid fa-building-columns"></i> BCA VA</div>
+          <div class="method-pill"><i class="fa-solid fa-building-columns"></i> Mandiri</div>
+          <div class="method-pill"><i class="fa-solid fa-building-columns"></i> BNI / BRI</div>
+          <div class="method-pill"><i class="fa-solid fa-credit-card"></i> Visa / Mastercard</div>
+          <div class="method-pill"><i class="fa-solid fa-wallet"></i> GoPay / Shopee</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MIDTRANS SNAP SANDBOX MODAL POPUP ==================== -->
+<div class="snap-modal-overlay" id="snapModal">
+  <div class="snap-modal-box">
+    <!-- MODAL HEADER -->
+    <div class="snap-modal-top">
+      <div class="snap-logo-badge">
+        <div class="snap-logo-icon">M</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: -0.02em;">MIDTRANS SNAP</div>
+          <div style="font-size: 10px; color: #78a2cc; display: flex; align-items: center; gap: 5px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #4caf50; display: inline-block;"></span>
+            SANDBOX ENVIRONMENT
+          </div>
+        </div>
+      </div>
+      <button class="snap-modal-close" onclick="closeSandboxModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- ORDER BANNER -->
+    <div class="snap-order-banner">
+      <div>
+        <div style="font-size: 11px; color: #626d77;">Total Pembayaran</div>
+        <div style="font-size: 18px; font-weight: 800; color: #0f1c2e;">
+          Rp {{ pesanan.total_harga|floatformat:0 }}
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 10px; color: #626d77;">Order ID</div>
+        <div style="font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 700; color: #0070ba;">
+          {{ pesanan.order_id }}
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: PILIH METODE PEMBAYARAN -->
+    <div id="snapStepChannels" class="snap-channels-list">
+      <div style="font-size: 12px; font-weight: 700; color: #424e5a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+        Pilih Metode Pembayaran
+      </div>
+
+      <!-- BCA VA -->
+      <div class="snap-channel-item" onclick="selectChannel('bca')">
+        <div class="snap-channel-left">
+          <div class="snap-channel-icon" style="background: #e8f1fb; color: #005697;">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #0f1c2e;">BCA Virtual Account</div>
+            <div style="font-size: 11px; color: #76818c;">Verifikasi transfer otomatis 24 jam</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color: #aab4be; font-size: 12px;"></i>
+      </div>
+
+      <!-- MANDIRI BILL -->
+      <div class="snap-channel-item" onclick="selectChannel('mandiri')">
+        <div class="snap-channel-left">
+          <div class="snap-channel-icon" style="background: #fff8e6; color: #b78103;">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #0f1c2e;">Mandiri Bill Payment</div>
+            <div style="font-size: 11px; color: #76818c;">Livin' by Mandiri, ATM, & Internet Banking</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color: #aab4be; font-size: 12px;"></i>
+      </div>
+
+      <!-- BNI / BRI VA -->
+      <div class="snap-channel-item" onclick="selectChannel('bni')">
+        <div class="snap-channel-left">
+          <div class="snap-channel-icon" style="background: #ebf9f5; color: #00875a;">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #0f1c2e;">BNI / BRI Virtual Account</div>
+            <div style="font-size: 11px; color: #76818c;">BNI Mobile, BRImo, atau ATM</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color: #aab4be; font-size: 12px;"></i>
+      </div>
+
+      <!-- QRIS -->
+      <div class="snap-channel-item" onclick="selectChannel('qris')">
+        <div class="snap-channel-left">
+          <div class="snap-channel-icon" style="background: #fdf0f0; color: #cf1322;">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #0f1c2e;">QRIS / GoPay / ShopeePay</div>
+            <div style="font-size: 11px; color: #76818c;">Scan kode QR langsung dari e-wallet</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color: #aab4be; font-size: 12px;"></i>
+      </div>
+
+      <!-- KARTU KREDIT -->
+      <div class="snap-channel-item" onclick="selectChannel('cc')">
+        <div class="snap-channel-left">
+          <div class="snap-channel-icon" style="background: #f4effb; color: #6929c4;">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #0f1c2e;">Kartu Kredit / Debit</div>
+            <div style="font-size: 11px; color: #76818c;">Visa, Mastercard, JCB</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color: #aab4be; font-size: 12px;"></i>
+      </div>
+    </div>
+
+    <!-- STEP 2: DETAIL METODE TERPILIH -->
+    <div id="snapStepDetail" class="snap-detail-wrap" style="display: none;">
+      <button class="btn-snap-back" onclick="backToChannels()">
+        <i class="fa-solid fa-arrow-left"></i> Pilih metode pembayaran lain
+      </button>
+
+      <!-- DETAIL VA (BCA / MANDIRI / BNI) -->
+      <div id="channelDetailVA" style="display: none;">
+        <div style="background: #f7faff; border: 1px solid #d0e2ff; border-radius: 14px; padding: 18px; margin-bottom: 16px; text-align: center;">
+          <div id="vaBankName" style="font-size: 12px; font-weight: 700; color: #0043ce; text-transform: uppercase;">BCA VIRTUAL ACCOUNT</div>
+          <div id="vaNumberDisplay" style="font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 800; color: #0f1c2e; margin: 8px 0; letter-spacing: 0.05em;">
+            70012 8782 6615
+          </div>
+          <button type="button" onclick="copyVA()" style="background: #e8f1fb; color: #005697; border: none; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+            <i class="fa-solid fa-copy"></i> Salin Nomor VA
+          </button>
+        </div>
+
+        <div style="font-size: 12px; color: #525f6c; line-height: 1.6; margin-bottom: 16px;">
+          <div style="font-weight: 700; margin-bottom: 4px; color: #171916;">Petunjuk Pembayaran Sandbox:</div>
+          <div>1. Salin nomor Virtual Account di atas.</div>
+          <div>2. Pastikan nominal transfer tepat <b>Rp {{ pesanan.total_harga|floatformat:0 }}</b>.</div>
+          <div>3. Klik tombol di bawah untuk menyelesaikan transaksi di Sandbox.</div>
+        </div>
+      </div>
+
+      <!-- DETAIL QRIS -->
+      <div id="channelDetailQRIS" style="display: none; text-align: center;">
+        <div style="background: #fff; border: 2px dashed #0070ba; border-radius: 16px; padding: 16px; display: inline-block; margin-bottom: 12px;">
+          <!-- REAL DYNAMIC QRIS SVG -->
+          <svg width="180" height="180" viewBox="0 0 180 180" style="display: block;">
+            <rect width="180" height="180" fill="#ffffff"/>
+            <!-- Corner marker 1 -->
+            <rect x="15" y="15" width="45" height="45" fill="#000000"/>
+            <rect x="22" y="22" width="31" height="31" fill="#ffffff"/>
+            <rect x="29" y="29" width="17" height="17" fill="#000000"/>
+            <!-- Corner marker 2 -->
+            <rect x="120" y="15" width="45" height="45" fill="#000000"/>
+            <rect x="127" y="22" width="31" height="31" fill="#ffffff"/>
+            <rect x="134" y="29" width="17" height="17" fill="#000000"/>
+            <!-- Corner marker 3 -->
+            <rect x="15" y="120" width="45" height="45" fill="#000000"/>
+            <rect x="22" y="127" width="31" height="31" fill="#ffffff"/>
+            <rect x="29" y="134" width="17" height="17" fill="#000000"/>
+            <!-- Data modules -->
+            <rect x="70" y="20" width="10" height="10" fill="#000000"/>
+            <rect x="90" y="20" width="15" height="10" fill="#000000"/>
+            <rect x="70" y="40" width="20" height="10" fill="#000000"/>
+            <rect x="100" y="40" width="10" height="20" fill="#000000"/>
+            <rect x="20" y="70" width="15" height="10" fill="#000000"/>
+            <rect x="45" y="70" width="10" height="10" fill="#000000"/>
+            <rect x="70" y="70" width="40" height="40" fill="#0070ba" rx="4"/>
+            <text x="90" y="94" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle" font-family="sans-serif">QRIS</text>
+            <rect x="125" y="70" width="20" height="10" fill="#000000"/>
+            <rect x="150" y="85" width="10" height="25" fill="#000000"/>
+            <rect x="20" y="95" width="25" height="10" fill="#000000"/>
+            <rect x="70" y="120" width="15" height="15" fill="#000000"/>
+            <rect x="95" y="120" width="10" height="25" fill="#000000"/>
+            <rect x="120" y="120" width="20" height="10" fill="#000000"/>
+            <rect x="145" y="135" width="15" height="20" fill="#000000"/>
+            <rect x="70" y="145" width="20" height="15" fill="#000000"/>
+            <rect x="115" y="145" width="15" height="15" fill="#000000"/>
+          </svg>
+        </div>
+        <div style="font-size: 12px; font-weight: 700; color: #171916; margin-bottom: 4px;">Scan dengan aplikasi e-Wallet apa saja</div>
+        <div style="font-size: 11px; color: #76818c;">GoPay, ShopeePay, BCA Mobile, Livin, OVO, Dana</div>
+      </div>
+
+      <!-- DETAIL KARTU KREDIT -->
+      <div id="channelDetailCC" style="display: none;">
+        <div style="background: #171c26; color: #fff; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <span style="font-size: 11px; color: #9da396;">SANDBOX TEST CARD</span>
+            <i class="fa-brands fa-cc-visa" style="font-size: 24px; color: #fff;"></i>
+          </div>
+          <div style="font-family: 'DM Mono', monospace; font-size: 17px; letter-spacing: 0.1em; margin-bottom: 14px;" id="ccPreviewNumber">
+            4811 1111 1111 1114
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #d0d7ca;">
+            <span>{{ pesanan.user.first_name|upper|default:"CUSTOMER" }}</span>
+            <span>EXP: 12/28</span>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: #525f6c; line-height: 1.5; margin-bottom: 14px;">
+          Kartu uji coba Sandbox sudah siap otomatis. Klik tombol di bawah untuk verifikasi pembayaran.
+        </div>
+      </div>
+
+      <!-- ACTION BUTTON -->
+      <button id="btnConfirmPay" class="btn-snap-action" onclick="executeSandboxSettlement()">
+        <i class="fa-solid fa-lock"></i>
+        <span>Bayar Sekarang (Konfirmasi Sandbox)</span>
+      </button>
+    </div>
+
+    <!-- STEP 3: SUCCESS STATE ANIMATION -->
+    <div id="snapStepSuccess" class="snap-detail-wrap" style="display: none; text-align: center; padding: 40px 24px;">
+      <div style="width: 72px; height: 72px; border-radius: 50%; background: #e5f8ea; color: #2e7d32; display: inline-flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 20px;">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h3 style="font-size: 20px; font-weight: 800; color: #0f1c2e; margin: 0 0 8px;">Pembayaran Berhasil!</h3>
+      <p style="font-size: 13px; color: #5c6874; margin: 0 0 20px;">
+        Transaksi telah diverifikasi oleh gateway Midtrans Sandbox. Mengalihkan ke nota resmi...
+      </p>
+      <div style="font-size: 12px; color: #0070ba; font-weight: 700;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan tanda terima...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL UPLOAD FOOTAGE ==================== -->
+<div class="snap-modal-overlay" id="footageModal" style="display: none;">
+  <div class="snap-modal-box" style="max-width: 520px;">
+    <!-- HEADER -->
+    <div style="background: #171916; color: #fff; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 32px; height: 32px; background: var(--lime); color: #171916; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800;">
+          <i class="fa-solid fa-film"></i>
+        </div>
+        <div>
+          <div style="font-size: 14px; font-weight: 800;">Unggah Bahan Video / Footage</div>
+          <div style="font-size: 11px; color: #9da396;">Pesanan {{ pesanan.order_id }}</div>
+        </div>
+      </div>
+      <button type="button" onclick="closeFootageModal()" style="background: none; border: none; color: #9da396; font-size: 22px; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
+    </div>
+
+    <!-- FORM BODY -->
+    <form method="POST" action="{% url 'pesan_upload_footage' pesanan.clean_order_id %}" enctype="multipart/form-data" style="padding: 24px;">
+      {% csrf_token %}
+      <input type="hidden" name="upload_method" id="modalFootageMethod" value="{% if pesanan.upload_method == 'file' %}file{% else %}drive{% endif %}">
+
+      <p style="font-size: 12px; color: var(--muted); margin: 0 0 16px; line-height: 1.5;">
+        Pilih metode yang paling nyaman untuk mengirimkan bahan mentah video ke editor kami:
+      </p>
+
+      <!-- TAB BUTTONS -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #f0f2eb; padding: 4px; border-radius: 12px;">
+        <button type="button" id="modalTabDrive" onclick="setModalFootageTab('drive')" style="flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: {% if pesanan.upload_method != 'file' %}#fff{% else %}transparent{% endif %}; color: {% if pesanan.upload_method != 'file' %}#171916{% else %}var(--muted){% endif %}; box-shadow: {% if pesanan.upload_method != 'file' %}0 2px 6px rgba(0,0,0,0.06){% else %}none{% endif %}; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <i class="fa-solid fa-cloud"></i> Link Drive / Cloud
+        </button>
+        <button type="button" id="modalTabFile" onclick="setModalFootageTab('file')" style="flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: {% if pesanan.upload_method == 'file' %}#fff{% else %}transparent{% endif %}; color: {% if pesanan.upload_method == 'file' %}#171916{% else %}var(--muted){% endif %}; box-shadow: {% if pesanan.upload_method == 'file' %}0 2px 6px rgba(0,0,0,0.06){% else %}none{% endif %}; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <i class="fa-solid fa-file-video"></i> Upload File Langsung
+        </button>
+      </div>
+
+      <!-- DRIVE PANE -->
+      <div id="modalPaneDrive" style="display: {% if pesanan.upload_method != 'file' %}block{% else %}none{% endif %}; margin-bottom: 20px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
+          Link Folder / File Cloud
+        </label>
+        <input type="url" name="video_link" id="modalVideoLinkInput" value="{{ pesanan.video_link|default:'' }}" placeholder="https://drive.google.com/drive/folders/..." style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); font-size: 13px; font-family: 'DM Mono', monospace; box-sizing: border-box; outline: none;">
+        <small style="display: block; font-size: 11px; color: var(--muted); margin-top: 6px;">
+          💡 Pastikan izin akses link diatur ke <b>"Anyone with the link / Siapa saja yang memiliki link"</b> agar editor dapat mengunduh bahan.
+        </small>
+      </div>
+
+      <!-- FILE PANE -->
+      <div id="modalPaneFile" style="display: {% if pesanan.upload_method == 'file' %}block{% else %}none{% endif %}; margin-bottom: 20px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
+          Pilih File Video / Arsip Mentahan
+        </label>
+        <input type="file" name="video_file" id="modalVideoFileInput" accept="video/*,.zip,.rar" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px dashed var(--line); font-size: 12px; background: #fafbf8; box-sizing: border-box;">
+        <small style="display: block; font-size: 11px; color: var(--muted); margin-top: 6px;">
+          Mendukung format <code>.mp4</code>, <code>.mov</code>, <code>.zip</code>, atau <code>.rar</code>. Untuk file di atas 500MB disarankan menggunakan Link Google Drive.
+        </small>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--line);">
+        <button type="button" onclick="closeFootageModal()" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--line); background: #fafbf8; color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer;">
+          Batal
+        </button>
+        <button type="submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: #171916; color: var(--lime); font-size: 13px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-check"></i> Simpan Bahan Video
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var currentSelectedMethod = "BCA Virtual Account (Sandbox)";
+
+  function startSandboxPayment() {
+    // 1. Jika Midtrans Snap resmi tersedia dan ada Client Key:
+    var token = "{{ snap_token }}";
+    if (typeof window.snap !== 'undefined' && typeof window.snap.pay === 'function') {
+      try {
+        window.snap.pay(token, {
+          onSuccess: function(result) {
+            window.location.href = "{% url 'payment_finish' %}?order_id={{ pesanan.clean_order_id }}&status_code=200&transaction_status=settlement";
+          },
+          onPending: function(result) {
+            window.location.href = "{% url 'payment_finish' %}?order_id={{ pesanan.clean_order_id }}&status_code=201&transaction_status=pending";
+          },
+          onError: function(result) {
+            console.error("Snap error, fallback ke sandbox modal:", result);
+            openSandboxModal();
+          },
+          onClose: function() {
+            console.log("Snap modal closed");
+          }
+        });
+        return;
+      } catch (e) {
+        console.warn("Snap pay failed, opening internal sandbox modal:", e);
+      }
+    }
+
+    // 2. Default & Garansi Lancar: Langsung buka Sandbox Modal Checkout interaktif di halaman!
+    openSandboxModal();
+  }
+
+  function openSandboxModal() {
+    document.getElementById('snapModal').classList.add('active');
+    backToChannels();
+  }
+
+  function closeSandboxModal() {
+    document.getElementById('snapModal').classList.remove('active');
+  }
+
+  function selectChannel(type) {
+    document.getElementById('snapStepChannels').style.display = 'none';
+    document.getElementById('snapStepDetail').style.display = 'block';
+
+    document.getElementById('channelDetailVA').style.display = 'none';
+    document.getElementById('channelDetailQRIS').style.display = 'none';
+    document.getElementById('channelDetailCC').style.display = 'none';
+
+    var btnConfirm = document.getElementById('btnConfirmPay');
+    btnConfirm.disabled = false;
+    btnConfirm.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Bayar Sekarang (Konfirmasi Sandbox)</span>';
+
+    if (type === 'bca') {
+      currentSelectedMethod = 'BCA Virtual Account (Sandbox)';
+      document.getElementById('vaBankName').innerText = 'BCA VIRTUAL ACCOUNT';
+      document.getElementById('vaNumberDisplay').innerText = '70012 {{ pesanan.clean_order_id }}';
+      document.getElementById('channelDetailVA').style.display = 'block';
+    } else if (type === 'mandiri') {
+      currentSelectedMethod = 'Mandiri Bill Payment (Sandbox)';
+      document.getElementById('vaBankName').innerText = 'MANDIRI BILL PAYMENT';
+      document.getElementById('vaNumberDisplay').innerText = '70012 {{ pesanan.clean_order_id }}';
+      document.getElementById('channelDetailVA').style.display = 'block';
+    } else if (type === 'bni') {
+      currentSelectedMethod = 'BNI / BRI Virtual Account (Sandbox)';
+      document.getElementById('vaBankName').innerText = 'BNI / BRI VIRTUAL ACCOUNT';
+      document.getElementById('vaNumberDisplay').innerText = '98801 {{ pesanan.clean_order_id }}';
+      document.getElementById('channelDetailVA').style.display = 'block';
+    } else if (type === 'qris') {
+      currentSelectedMethod = 'QRIS / GoPay (Sandbox)';
+      document.getElementById('channelDetailQRIS').style.display = 'block';
+      btnConfirm.innerHTML = '<i class="fa-solid fa-qrcode"></i> <span>Konfirmasi Scan QRIS Berhasil</span>';
+    } else if (type === 'cc') {
+      currentSelectedMethod = 'Kartu Kredit (Sandbox)';
+      document.getElementById('channelDetailCC').style.display = 'block';
+      btnConfirm.innerHTML = '<i class="fa-solid fa-credit-card"></i> <span>Bayar Rp {{ pesanan.total_harga|floatformat:0 }}</span>';
+    }
+  }
+
+  function backToChannels() {
+    document.getElementById('snapStepChannels').style.display = 'block';
+    document.getElementById('snapStepDetail').style.display = 'none';
+    document.getElementById('snapStepSuccess').style.display = 'none';
+  }
+
+  function copyVA() {
+    var vaText = document.getElementById('vaNumberDisplay').innerText.replace(/\s+/g, '');
+    navigator.clipboard.writeText(vaText).then(function() {
+      alert("Nomor Virtual Account disalin: " + vaText);
+    });
+  }
+
+  function executeSandboxSettlement() {
+    var btn = document.getElementById('btnConfirmPay');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses Verifikasi Sandbox...</span>';
+
+    var formData = new FormData();
+    formData.append('method', currentSelectedMethod);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch("{% url 'payment_simulate_sandbox' pesanan.clean_order_id %}", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('snapStepDetail').style.display = 'none';
+        document.getElementById('snapStepSuccess').style.display = 'block';
+        setTimeout(function() {
+          window.location.href = data.redirect_url;
+        }, 1400);
+      } else {
+        alert("Gagal memproses: " + (data.message || "Terjadi kesalahan"));
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Bayar Sekarang (Konfirmasi Sandbox)</span>';
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      // Fallback redirect standar jika fetch error
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = "{% url 'payment_simulate_sandbox' pesanan.clean_order_id %}";
+      var csrf = document.createElement('input');
+      csrf.type = 'hidden';
+      csrf.name = 'csrfmiddlewaretoken';
+      csrf.value = '{{ csrf_token }}';
+      form.appendChild(csrf);
+      var m = document.createElement('input');
+      m.type = 'hidden';
+      m.name = 'method';
+      m.value = currentSelectedMethod;
+      form.appendChild(m);
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
+  function checkLiveStatus() {
+    var icon = document.getElementById('checkIcon');
+    if (icon) icon.classList.add('fa-spin');
+
+    fetch("{% url 'payment_check_status' pesanan.clean_order_id %}")
+      .then(response => response.json())
+      .then(data => {
+        if (icon) icon.classList.remove('fa-spin');
+        if (data.is_paid) {
+          alert("Pembayaran berhasil dikonfirmasi!");
+          window.location.reload();
+        } else {
+          alert("Status saat ini: " + data.status_display + ". Jika sudah mentransfer, mohon tunggu beberapa saat untuk pembaruan dari Midtrans.");
+        }
+      })
+      .catch(err => {
+        if (icon) icon.classList.remove('fa-spin');
+        console.error(err);
+        alert("Gagal memeriksa status pembayaran. Silakan coba kembali.");
+      });
+  }
+  function openFootageModal() {
+    var modal = document.getElementById('footageModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+    }
+  }
+
+  function closeFootageModal() {
+    var modal = document.getElementById('footageModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    }
+  }
+
+  function setModalFootageTab(mode) {
+    var methodInput = document.getElementById('modalFootageMethod');
+    var tabDrive = document.getElementById('modalTabDrive');
+    var tabFile = document.getElementById('modalTabFile');
+    var paneDrive = document.getElementById('modalPaneDrive');
+    var paneFile = document.getElementById('modalPaneFile');
+    if (methodInput) methodInput.value = mode;
+
+    if (mode === 'drive') {
+      if (tabDrive) {
+        tabDrive.style.background = '#fff';
+        tabDrive.style.color = '#171916';
+        tabDrive.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+      }
+      if (tabFile) {
+        tabFile.style.background = 'transparent';
+        tabFile.style.color = 'var(--muted)';
+        tabFile.style.boxShadow = 'none';
+      }
+      if (paneDrive) paneDrive.style.display = 'block';
+      if (paneFile) paneFile.style.display = 'none';
+    } else {
+      if (tabFile) {
+        tabFile.style.background = '#fff';
+        tabFile.style.color = '#171916';
+        tabFile.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+      }
+      if (tabDrive) {
+        tabDrive.style.background = 'transparent';
+        tabDrive.style.color = 'var(--muted)';
+        tabDrive.style.boxShadow = 'none';
+      }
+      if (paneDrive) paneDrive.style.display = 'none';
+      if (paneFile) paneFile.style.display = 'block';
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,484 @@
+{% extends 'public_base.html' %}
+
+{% block title %}Katalog Layanan Video Editing — FRAMEHAUS{% endblock %}
+
+{% block public_extra_styles %}
+.shop-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-chip {
+  border: 1px solid #e0e2d9;
+  background: transparent;
+  padding: 9px 16px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #73796e;
+  cursor: pointer;
+  transition: .2s;
+}
+.filter-chip.active, .filter-chip:hover {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: #fff;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.product-card {
+  background: #fff;
+  border: 1px solid #e9eae3;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: .25s;
+  display: flex;
+  flex-direction: column;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.product-image {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #dce1d5;
+}
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: .4s;
+}
+.product-card:hover .product-image img { transform: scale(1.05); }
+.product-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(255,255,255,.94);
+  border-radius: 30px;
+  padding: 6px 12px;
+  font: 700 9px 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink);
+}
+.product-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.product-body h3 {
+  font: 700 18px 'Manrope', sans-serif;
+  letter-spacing: -.04em;
+  margin: 0 0 8px;
+}
+.product-body p {
+  font-size: 13px;
+  color: #858a80;
+  line-height: 1.6;
+  margin: 0 0 20px;
+  flex: 1;
+}
+.product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #eff0ea;
+}
+.product-price {
+  font: 800 18px 'Manrope', sans-serif;
+  letter-spacing: -.04em;
+  color: var(--ink);
+}
+.product-duration {
+  font-size: 11px;
+  color: #858a80;
+}
+.add-btn {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--lime);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  transition: .2s;
+  cursor: pointer;
+}
+.add-btn:hover {
+  transform: rotate(90deg);
+  background: #d7f992;
+}
+
+/* CALCULATOR */
+.calculator {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 25px;
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  overflow: hidden;
+  box-shadow: 0 16px 45px rgba(31,35,28,.05);
+}
+.calc-form { padding: 36px; }
+.calc-summary {
+  padding: 36px;
+  background: var(--dark);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 390px;
+}
+.field { margin: 18px 0; }
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.field select, .field input {
+  width: 100%;
+  border: 1px solid #e4e6dd;
+  background: #fafbf8;
+  border-radius: 12px;
+  padding: 13px 14px;
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.check-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.check-pill {
+  border: 1px solid #e5e7df;
+  border-radius: 30px;
+  padding: 9px 14px;
+  font-size: 11px;
+  color: #666d61;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: .2s;
+}
+.check-pill input { accent-color: #8aa74d; }
+.calc-summary .price {
+  font: 800 42px 'Manrope', sans-serif;
+  letter-spacing: -.06em;
+  margin: 12px 0 6px;
+  color: var(--lime);
+}
+.calc-summary .muted {
+  color: #a8afa1;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  font-size: 11px;
+  color: #b6beb0;
+}
+.summary-line strong { color: #fff; font-weight: 600; }
+
+@media(max-width: 900px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .calculator { grid-template-columns: 1fr; }
+}
+@media(max-width: 700px) {
+  .product-grid { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block page_content %}
+<!-- PAGE HERO -->
+<section class="wrap page-hero">
+  <div class="eyebrow">THE SERVICE MENU</div>
+  <h1>Find your<br/><span style="color: #8a9a70;">perfect cut.</span></h1>
+  <p>Pilih paket editing yang sesuai dengan kebutuhan konten Anda. Semua pesanan akan langsung diproses oleh tim profesional dengan komunikasi transparan.</p>
+</section>
+
+<!-- SERVICES MENU -->
+<section class="wrap section" style="padding-top: 10px;">
+  <div class="shop-toolbar">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-chip active" onclick="setFilter('all', this)">Semua Layanan</button>
+      <button class="filter-chip" onclick="setFilter('social', this)">Social Media</button>
+      <button class="filter-chip" onclick="setFilter('youtube', this)">YouTube</button>
+      <button class="filter-chip" onclick="setFilter('brand', this)">Brand & Ads</button>
+      <button class="filter-chip" onclick="setFilter('event', this)">Event</button>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="catalogSearch" placeholder="Cari nama layanan…" oninput="renderCatalog()" />
+      </div>
+      <select id="catalogSort" onchange="renderCatalog()" style="border: 1px solid #e0e2d9; border-radius: 30px; padding: 10px 16px; font-size: 12px; background: #fff; outline: 0;">
+        <option value="featured">Urutkan: Rekomendasi</option>
+        <option value="low">Harga Terendah</option>
+        <option value="high">Harga Tertinggi</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="product-grid" id="catalogGrid"></div>
+</section>
+
+<!-- QUICK ESTIMATE CALCULATOR SECTION -->
+<section class="wrap section" id="calculatorSection" style="padding-top: 20px;">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">CUSTOM PACKAGE</div>
+      <h2>Know your budget<br/>before we roll.</h2>
+    </div>
+    <p>Sesuaikan durasi dan fitur editing footage Anda. Estimasi harga otomatis dihitung dan dapat langsung dipesan.</p>
+  </div>
+
+  <div class="calculator">
+    <div class="calc-form">
+      <div class="field">
+        <label>Jenis video</label>
+        <select id="calcService" onchange="updateCalculator()">
+          <option value="reels">Social Media / Reels</option>
+          <option value="youtube">YouTube Video</option>
+          <option value="ads">Brand Ads / Commercial</option>
+          <option value="event">Event / Wedding Film</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Durasi hasil video</label>
+          <select id="calcDuration" onchange="updateCalculator()">
+            <option value="1">Di bawah 1 menit</option>
+            <option value="2">1–5 menit</option>
+            <option value="3">5–15 menit</option>
+            <option value="4">15–30 menit</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Waktu pengerjaan</label>
+          <select id="calcSpeed" onchange="updateCalculator()">
+            <option value="normal">Regular (3–5 hari)</option>
+            <option value="fast">Express (1–2 hari)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tambahan layanan khusus</label>
+        <div class="check-grid">
+          <label class="check-pill">
+            <input type="checkbox" value="150000" onchange="updateCalculator()" /> Subtitle (+150k)
+          </label>
+          <label class="check-pill">
+            <input type="checkbox" value="200000" onchange="updateCalculator()" /> Motion graphic (+200k)
+          </label>
+          <label class="check-pill">
+            <input type="checkbox" value="100000" onchange="updateCalculator()" /> Thumbnail (+100k)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-summary">
+      <div>
+        <div class="eyebrow" style="color: #aab59e;">YOUR ESTIMATE</div>
+        <div class="price" id="calcPrice">Rp350.000</div>
+        <div class="muted">Estimasi awal dapat disesuaikan dengan kompleksitas materi footage.</div>
+
+        <div style="margin-top: 24px;">
+          <div class="summary-line">
+            <span>Layanan</span>
+            <strong id="calcName">Social Media / Reels</strong>
+          </div>
+          <div class="summary-line">
+            <span>Waktu pengerjaan</span>
+            <strong id="calcSpeedLabel">3–5 hari</strong>
+          </div>
+          <div class="summary-line">
+            <span>Tambahan</span>
+            <strong id="calcExtras">Rp0</strong>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-lime" onclick="addCustomToCart()" style="width: 100%; margin-top: 20px;">
+        Tambah Custom ke Keranjang
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+          <path d="M5 12h14m-6-6 6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block public_scripts %}
+<script>
+  // Dynamic Services loaded directly from database (CRUD synced)
+  const products = [
+    {% for s in all_services %}
+    {
+      id: '{{ s.id }}',
+      name: '{{ s.nama|escapejs }}',
+      cat: '{{ s.kategori }}',
+      tag: '{{ s.tag|escapejs }}',
+      desc: '{{ s.deskripsi|escapejs }}',
+      price: {{ s.harga }},
+      duration: '{{ s.durasi|escapejs }}',
+      img: '{{ s.get_image_url|escapejs }}'
+    }{% if not forloop.last %},{% endif %}
+    {% empty %}
+    {% endfor %}
+  ];
+
+  let currentFilter = 'all';
+
+  // Read URL query parameter if any (e.g. ?cat=social)
+  const urlParams = new URLSearchParams(window.location.search);
+  const catParam = urlParams.get('cat');
+  if (catParam) {
+    currentFilter = catParam;
+  }
+
+  function setFilter(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCatalog();
+  }
+
+  function renderCatalog() {
+    const query = (document.getElementById('catalogSearch')?.value || '').toLowerCase();
+    const sort = document.getElementById('catalogSort')?.value;
+
+    let items = products.filter(p => {
+      const matchCat = currentFilter === 'all' || p.cat === currentFilter;
+      const matchQuery = p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query);
+      return matchCat && matchQuery;
+    });
+
+    if (sort === 'low') items.sort((a,b) => a.price - b.price);
+    if (sort === 'high') items.sort((a,b) => b.price - a.price);
+
+    const container = document.getElementById('catalogGrid');
+    if (!container) return;
+
+    if (!items.length) {
+      container.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--muted);">Layanan tidak ditemukan. Coba kata kunci lain.</div>';
+      return;
+    }
+
+    container.innerHTML = items.map((p, idx) => `
+      <div class="product-card is-revealed" data-reveal style="animation: springScale 0.45s var(--spring) both; animation-delay: ${idx * 0.07}s;">
+        <div class="product-image">
+          <a href="/shop/${p.id}/" style="display: block; width: 100%; height: 100%;">
+            <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'" />
+          </a>
+          <span class="product-tag">${p.tag}</span>
+        </div>
+        <div class="product-body">
+          <h3><a href="/shop/${p.id}/" style="color: inherit; text-decoration: none;">${p.name}</a></h3>
+          <p>${p.desc}</p>
+          <div class="product-bottom">
+            <div>
+              <div class="product-price">${formatRupiah(p.price)}</div>
+              <div class="product-duration">${p.duration}</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <a href="/shop/${p.id}/" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 7px 12px; border-radius: 20px;">
+                Detail ↗
+              </a>
+              <button class="add-btn" onclick="addToCart('${p.id}')" title="Tambah ke Keranjang">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 15px; height: 15px;">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addToCart(productId) {
+    const item = products.find(x => x.id === productId);
+    if (!item) return;
+    addToCartObject(item);
+  }
+
+  function addCustomToCart() {
+    const price = calculatePrice();
+    const serviceName = document.getElementById('calcName').textContent;
+    const speed = document.getElementById('calcSpeedLabel').textContent;
+
+    const customItem = {
+      id: 'custom-' + Date.now(),
+      name: `${serviceName} (Custom Estimate)`,
+      cat: document.getElementById('calcService').value,
+      price: price,
+      duration: speed,
+      desc: 'Paket kalkulator estimasi khusus.',
+      img: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=300&q=80',
+      qty: 1
+    };
+    addToCartObject(customItem);
+  }
+
+  // Calculator logic
+  const basePrices = { reels: 350000, youtube: 650000, ads: 1500000, event: 1200000 };
+  const names = { reels: 'Social Media / Reels', youtube: 'YouTube Video', ads: 'Brand Ads / Commercial', event: 'Event / Wedding Film' };
+  const durationMultipliers = { 1: 1, 2: 1.35, 3: 1.85, 4: 2.5 };
+
+  function calculatePrice() {
+    const type = document.getElementById('calcService').value;
+    const duration = document.getElementById('calcDuration').value;
+    const speed = document.getElementById('calcSpeed').value;
+    let extras = 0;
+    document.querySelectorAll('#calculatorSection input[type=checkbox]:checked').forEach(c => extras += Number(c.value));
+    let base = basePrices[type] * durationMultipliers[duration];
+    if (speed === 'fast') base *= 1.35;
+    return Math.round((base + extras) / 1000) * 1000;
+  }
+
+  function updateCalculator() {
+    const type = document.getElementById('calcService').value;
+    const extras = [...document.querySelectorAll('#calculatorSection input[type=checkbox]:checked')].reduce((a,c) => a + Number(c.value), 0);
+    const speed = document.getElementById('calcSpeed').value;
+    document.getElementById('calcPrice').textContent = formatRupiah(calculatePrice());
+    document.getElementById('calcName').textContent = names[type];
+    document.getElementById('calcSpeedLabel').textContent = speed === 'fast' ? '1–2 hari (Express)' : '3–5 hari (Regular)';
+    document.getElementById('calcExtras').textContent = formatRupiah(extras);
+  }
+
+  // Set initial filter active button if query param existed
+  if (catParam) {
+    const chip = Array.from(document.querySelectorAll('.filter-chip')).find(b => b.textContent.toLowerCase().includes(catParam));
+    if (chip) {
+      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+      chip.classList.add('active');
+    }
+  }
+
+  renderCatalog();
+  updateCalculator();
+</script>
+{% endblock %}

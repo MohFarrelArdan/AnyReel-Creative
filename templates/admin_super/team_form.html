@@ -1,0 +1,160 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}{% if action == 'create' %}Tambah Anggota Tim{% else %}Edit Anggota Tim{% endif %} — FRAMEHAUS{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
+</a>
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
+</a>
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}" class="active">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
+</a>
+{% endblock %}
+
+{% block page_title %}{% if action == 'create' %}Tambah Anggota Tim Baru{% else %}Edit Profil Anggota Tim{% endif %}{% endblock %}
+{% block page_subtitle %}Informasi personil akan langsung ditampilkan di section Team pada halaman About.{% endblock %}
+
+{% block page_body %}
+<div class="form-card" style="max-width: 820px;">
+  <div class="form-card-title">
+    <i class="fa-solid fa-id-card" style="color: #6a7d4e;"></i>
+    <span>Formulir Anggota Tim Studio</span>
+  </div>
+
+  <form method="POST" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap *</label>
+        <input type="text" name="nama" value="{{ member.nama|default:'' }}" required placeholder="Contoh: Moh Farrel Ardan" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Role / Jabatan *</label>
+        <input type="text" name="role" value="{{ member.role|default:'' }}" required placeholder="Contoh: Lead Editor & Creative Director" />
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Lencana Badge *</label>
+        <input type="text" name="role_badge" value="{{ member.role_badge|default:'CREATIVE TEAM' }}" required placeholder="FOUNDER & DIRECTOR" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Urutan Tampil *</label>
+        <input type="number" name="urutan" value="{{ member.urutan|default:'1' }}" required min="1" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Bio Singkat *</label>
+      <textarea name="bio" rows="3" required placeholder="Tuliskan pengalaman, keahlian utama, atau deskripsi profesional...">{{ member.bio|default:'' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Keahlian & Perangkat Lunak (Pisahkan dengan koma)</label>
+      <input type="text" name="keahlian" value="{{ member.keahlian|default:'' }}" placeholder="Contoh: Premiere Pro, DaVinci Resolve, Directing, Colorist" />
+      <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Keahlian ini akan ditampilkan sebagai badge tag pada kartu anggota tim.</small>
+    </div>
+
+    <div class="form-section-divider">
+      <i class="fa-solid fa-image"></i> Foto Profil Anggota
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Upload File Foto</label>
+        <input type="file" name="foto" accept="image/*" />
+        {% if member.foto %}
+        <div style="margin-top: 8px;">
+          <img src="{{ member.foto.url }}" alt="Preview" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Atau Masukkan URL Foto Eksternal</label>
+        <input type="url" name="foto_url" value="{{ member.foto_url|default:'' }}" placeholder="https://images.unsplash.com/photo-..." />
+        {% if member.foto_url %}
+        <div style="margin-top: 8px;">
+          <img src="{{ member.foto_url }}" alt="Preview" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'" />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-section-divider">
+      <i class="fa-solid fa-share-nodes"></i> Kontak & Media Sosial
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Email Personil</label>
+        <input type="email" name="email" value="{{ member.email|default:'' }}" placeholder="nama@framehaus.studio" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Instagram URL</label>
+        <input type="url" name="social_instagram" value="{{ member.social_instagram|default:'' }}" placeholder="https://instagram.com/username" />
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">LinkedIn URL</label>
+        <input type="url" name="social_linkedin" value="{{ member.social_linkedin|default:'' }}" placeholder="https://linkedin.com/in/username" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Behance / Vimeo / Portfolio URL</label>
+        <input type="url" name="social_behance" value="{{ member.social_behance|default:'' }}" placeholder="https://behance.net/username" />
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top: 14px;">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+        <input type="checkbox" name="aktif" {% if member.aktif or action == 'create' %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--dark);" />
+        <span>Aktifkan dan tampilkan personil ini di halaman About</span>
+      </label>
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn btn-dark">
+        <i class="fa-solid fa-floppy-disk"></i> Simpan Data Anggota
+      </button>
+      <a href="{% url 'app:team_list' %}" class="btn btn-outline">Batal</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

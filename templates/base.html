@@ -3,80 +3,202 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Sistem Manajemen{% endblock %}</title>
-  <meta name="description" content="Platform manajemen pengguna modern dan aman." />
+  <title>{% block title %}FRAMEHAUS — Creative Video Editing Studio{% endblock %}</title>
+  <meta name="theme-color" content="#f4f3ee" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #818cf8;
-      --secondary: #0ea5e9;
-      --accent: #f43f5e;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --bg: #0f0f1a;
-      --bg-card: #1a1a2e;
-      --bg-input: #16213e;
-      --border: rgba(99,102,241,0.25);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --shadow: 0 20px 60px rgba(0,0,0,0.5);
+      --paper: #f4f3ee;
+      --white: #fff;
+      --ink: #171916;
+      --muted: #777b72;
+      --line: #e4e4dc;
+      --lime: #c8f169;
+      --lime-dark: #a9d84b;
+      --dark: #171b17;
+      --dark-2: #232923;
+      --soft: #e9ebe2;
+      --radius: 22px;
+      --shadow: 0 22px 60px rgba(24,29,21,.10);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      overflow-x: hidden;
     }
-    a { text-decoration: none; color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .mono { font-family: 'DM Mono', monospace; letter-spacing: .02em; }
+
+    /* ========================================================
+       REACT-LIKE ANIMATIONS & MICRO-INTERACTIONS
+       ======================================================== */
+    /* Scroll reveal transitions */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s var(--spring), transform 0.75s var(--spring);
+      will-change: opacity, transform;
+    }
+    [data-reveal].is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    [data-reveal="zoom"] {
+      transform: scale(0.95) translateY(20px);
+    }
+    [data-reveal="zoom"].is-revealed {
+      transform: scale(1) translateY(0);
+    }
+    [data-reveal="left"] {
+      transform: translateX(-30px);
+    }
+    [data-reveal="left"].is-revealed {
+      transform: translateX(0);
+    }
+    [data-reveal="right"] {
+      transform: translateX(30px);
+    }
+    [data-reveal="right"].is-revealed {
+      transform: translateX(0);
+    }
+
+    /* Staggered delays */
+    .delay-100 { transition-delay: 0.1s !important; }
+    .delay-150 { transition-delay: 0.15s !important; }
+    .delay-200 { transition-delay: 0.2s !important; }
+    .delay-300 { transition-delay: 0.3s !important; }
+    .delay-400 { transition-delay: 0.4s !important; }
+    .delay-500 { transition-delay: 0.5s !important; }
+
+    /* Keyframes */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,241,105,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(200,241,105,0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes springScale {
+      0% { transform: scale(0.95); opacity: 0; }
+      60% { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-float { animation: floatSlow 4.5s ease-in-out infinite; }
+    .animate-pulse-glow { animation: pulseGlow 2.5s infinite; }
+
+    /* Buttons with React-like Spring Physics */
     .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 10px; border: none;
-      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
-      cursor: pointer; transition: all 0.25s ease;
+      border: 0; border-radius: 100px; padding: 13px 22px;
+      font-size: 12px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all 0.28s var(--spring); white-space: nowrap; cursor: pointer;
+      position: relative; overflow: hidden;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+    .btn:active {
+      transform: scale(0.96) !important;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.5); }
-    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.4); }
-    .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-    .btn-success:hover { transform: translateY(-2px); }
-    .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
-    .btn-warning:hover { transform: translateY(-2px); }
-    .btn-ghost {
-      background: transparent; color: var(--text-muted);
-      border: 1px solid var(--border);
+    .btn svg { width: 15px; height: 15px; transition: transform 0.25s var(--spring); }
+    .btn:hover svg { transform: translateX(2px); }
+
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-dark:hover {
+      background: #283127;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(20,25,20,.18);
     }
-    .btn-ghost:hover { background: var(--bg-input); color: var(--text); }
-    .btn-sm { padding: 6px 14px; font-size: 13px; }
-    .messages-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-    .alert {
-      padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500;
-      display: flex; align-items: center; gap: 10px;
-      animation: slideIn 0.3s ease; min-width: 280px; max-width: 400px;
-      box-shadow: var(--shadow);
+    .btn-lime { background: var(--lime); color: var(--ink); }
+    .btn-lime:hover {
+      background: #d4f884;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(200,241,105,.35);
     }
-    .alert-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #86efac; }
-    .alert-warning { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: #fcd34d; }
-    .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
-    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .btn-outline {
+      border: 1px solid #d9dbd2;
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn-outline:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.05);
+      border-color: #c7cbc0;
+    }
+    .btn-danger { background: #f7e8e6; color: #b66d65; border: 1px solid #f0d0cc; }
+    .btn-danger:hover { background: #f0d0cc; transform: translateY(-2px); }
+    .btn-warning { background: #fff2dd; color: #a77a32; border: 1px solid #f5e2b8; }
+    .btn-warning:hover { background: #f5e2b8; transform: translateY(-2px); }
+    .btn-success { background: #e5f3e9; color: #4a875f; border: 1px solid #c8e6d0; }
+    .btn-success:hover { background: #c8e6d0; transform: translateY(-2px); }
+    .btn-sm { padding: 8px 14px; font-size: 11px; }
+    .btn-primary { background: var(--dark); color: #fff; }
+    .btn-primary:hover { background: #283127; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(20,25,20,.18); }
+
+    /* Interactive Cards & Grids Hover Micro-interactions */
+    .product-card, .article-card, .metric, .quick-card, .dash-panel, .price-card {
+      transition: transform 0.35s var(--spring), box-shadow 0.35s var(--spring), border-color 0.25s ease !important;
+      will-change: transform, box-shadow;
+    }
+    .product-card:hover, .article-card:hover, .quick-card:hover {
+      transform: translateY(-6px) !important;
+      box-shadow: 0 20px 45px -10px rgba(18,24,18,0.12), 0 0 0 1px rgba(200,241,105,0.4) !important;
+    }
+    .product-card .product-image img, .article-card img {
+      transition: transform 0.65s var(--spring) !important;
+    }
+    .product-card:hover .product-image img, .article-card:hover img {
+      transform: scale(1.06) !important;
+    }
+
+    /* Toast Messages */
+    .toast-container {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+    }
+    .toast {
+      background: var(--dark); color: #fff; padding: 14px 22px;
+      border-radius: 30px; font-size: 12px; font-weight: 600;
+      box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px;
+      animation: toastIn .35s var(--spring); min-width: 280px; max-width: 440px;
+    }
+    .toast-success { border-left: 3px solid #c8f169; }
+    .toast-warning { border-left: 3px solid #f5c542; }
+    .toast-error { border-left: 3px solid #e85d5d; }
+    .toast i { font-size: 14px; }
+    .toast-success i { color: #c8f169; }
+    .toast-warning i { color: #f5c542; }
+    .toast-error i { color: #e85d5d; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     {% block extra_styles %}{% endblock %}
   </style>
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
 
 {% if messages %}
-<div class="messages-container">
+<div class="toast-container">
   {% for message in messages %}
-  <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+  <div class="toast toast-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
     <i class="fa-solid {% if message.tags == 'error' %}fa-circle-xmark{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-check{% endif %}"></i>
     {{ message }}
   </div>
@@ -84,9 +206,10 @@
 </div>
 <script>
   setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(el => {
-      el.style.transition = 'opacity 0.4s';
+    document.querySelectorAll('.toast').forEach(el => {
+      el.style.transition = 'opacity 0.4s var(--spring), transform 0.4s var(--spring)';
       el.style.opacity = '0';
+      el.style.transform = 'translateY(10px) scale(0.95)';
       setTimeout(() => el.remove(), 400);
     });
   }, 4000);
@@ -94,6 +217,31 @@
 {% endif %}
 
 {% block content %}{% endblock %}
+
+<!-- REACT-LIKE SCROLL OBSERVER SCRIPT -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Scroll reveal observer
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    if ('IntersectionObserver' in window && revealElements.length > 0) {
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      revealElements.forEach(el => observer.observe(el));
+    } else {
+      revealElements.forEach(el => el.classList.add('is-revealed'));
+    }
+  });
+</script>
 
 </body>
 </html>

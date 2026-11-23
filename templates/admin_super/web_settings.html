@@ -1,0 +1,735 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Pengaturan Web & CMS — FRAMEHAUS Management{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
+
+{% block extra_styles %}
+{{ block.super }}
+.setting-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.setting-tab {
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #636b5c;
+  cursor: pointer;
+  transition: all 0.2s var(--spring);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.setting-tab.active, .setting-tab:hover {
+  background: var(--dark);
+  color: var(--lime);
+  border-color: var(--dark);
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+}
+.preview-box {
+  background: #f6f8f2;
+  border: 1px dashed #cad4be;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 10px;
+}
+.thumb-preview {
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
+</a>
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
+</a>
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}" class="active">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
+</a>
+{% endblock %}
+
+{% block page_title %}Pengaturan Website & Branding{% endblock %}
+{% block page_subtitle %}Ubah nama studio, logo web, video hero, teks/gambar karya, tim personil, halaman about, dan footer secara live langsung dari dashboard.{% endblock %}
+
+{% block page_body %}
+<!-- SETTING TABS -->
+<div class="setting-tabs">
+  <button type="button" class="setting-tab active" onclick="switchTab('tab-brand', this)">
+    <i class="fa-solid fa-palette"></i> 1. Brand & Logo
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-hero', this)">
+    <i class="fa-solid fa-play"></i> 2. Video Hero & Headline
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-work', this)">
+    <i class="fa-solid fa-images"></i> 3. Karya Pilihan (Images)
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-about', this)">
+    <i class="fa-solid fa-building"></i> 4. Halaman About & Story
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-team', this)">
+    <i class="fa-solid fa-users"></i> 5. Tim Studio (Nama, Role, Foto)
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-footer', this)">
+    <i class="fa-solid fa-shoe-prints"></i> 6. Footer & Kontak
+  </button>
+  <button type="button" class="setting-tab" onclick="switchTab('tab-midtrans', this)">
+    <i class="fa-solid fa-credit-card"></i> 7. Midtrans Gateway
+  </button>
+</div>
+
+<form method="POST" action="{% url 'app:web_settings' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <!-- ==================== TAB 1: BRANDING & LOGO ==================== -->
+  <div class="tab-pane active" id="tab-brand">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-palette" style="color: #6a7d4e;"></i>
+        <span>Identitas Brand & Logo Website</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nama Website / Studio *</label>
+          <input type="text" name="site_name" value="{{ setting.site_name }}" required placeholder="Contoh: FRAMEHAUS" />
+          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Nama utama yang muncul di title browser, navbar, dan footer.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tagline Website *</label>
+          <input type="text" name="site_tagline" value="{{ setting.site_tagline }}" required placeholder="Contoh: Creative Video Editing & Color Studio" />
+          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Slogan studio yang digunakan pada meta description.</small>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Teks Logo *</label>
+          <input type="text" name="logo_text" value="{{ setting.logo_text }}" required placeholder="FRAMEHAUS" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Simbol / Badge Logo *</label>
+          <input type="text" name="logo_badge" value="{{ setting.logo_badge }}" required placeholder="®" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Upload Custom Image Logo (Opsional)</label>
+        <input type="file" name="logo_image" accept="image/*" />
+        {% if setting.logo_image %}
+          <div class="preview-box">
+            <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px;">Logo saat ini:</span>
+            <img src="{{ setting.logo_image.url }}" alt="Logo" style="height: 40px; object-fit: contain;" />
+          </div>
+        {% endif %}
+        <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Kosongkan jika ingin menggunakan logo SVG default neon lime.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: HERO & VIDEO ==================== -->
+  <div class="tab-pane" id="tab-hero">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-play" style="color: #6a7d4e;"></i>
+        <span>Hero Section & Video Reel</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Eyebrow Hero *</label>
+        <input type="text" name="hero_eyebrow" value="{{ setting.hero_eyebrow }}" required placeholder="THE CREATIVE EDITING HOUSE" />
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Judul Hero Baris 1 *</label>
+          <input type="text" name="hero_title_line1" value="{{ setting.hero_title_line1 }}" required placeholder="Good stories" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Judul Hero Baris 2 (Hijau/Aksen) *</label>
+          <input type="text" name="hero_title_line2" value="{{ setting.hero_title_line2 }}" required placeholder="deserve a great cut." />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi Paragraf Hero *</label>
+        <textarea name="hero_subtitle" rows="3" required>{{ setting.hero_subtitle }}</textarea>
+      </div>
+
+      <div class="form-section-divider">
+        <i class="fa-solid fa-video"></i> Video Hero & Poster Visual
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Upload File Video Hero (.mp4)</label>
+          <input type="file" name="hero_video_file" accept="video/mp4,video/*" />
+          {% if setting.hero_video_file %}
+          <div class="preview-box">
+            <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">Video terunggah:</span>
+            <span style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink);">{{ setting.hero_video_file.name }}</span>
+          </div>
+          {% endif %}
+          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Pilih file video MP4 dari komputer Anda.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Atau URL Video Hero (.mp4) *</label>
+          <input type="url" name="hero_video_url" value="{{ setting.hero_video_url }}" required placeholder="https://domain.com/video.mp4" />
+          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;">Digunakan jika tidak mengunggah file video lokal.</small>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Upload Poster Cadangan Hero (Image)</label>
+          <input type="file" name="hero_poster_file" accept="image/*" />
+          {% if setting.hero_poster_file %}
+          <div class="preview-box">
+            <img src="{{ setting.hero_poster_file.url }}" alt="Poster" class="thumb-preview" />
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Atau URL Poster Cadangan Video *</label>
+          <input type="url" name="hero_poster_image" value="{{ setting.hero_poster_image }}" required />
+          <div style="margin-top: 8px;">
+            <img src="{{ setting.get_hero_poster_url }}" alt="Preview Poster" class="thumb-preview" onerror="this.src='https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=400&q=80'" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Teks Badge Mengambang Hero *</label>
+          <input type="text" name="hero_badge_text" value="{{ setting.hero_badge_text }}" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Judul Kartu Status Editing *</label>
+          <input type="text" name="hero_card_title" value="{{ setting.hero_card_title }}" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi Kartu Status Editing *</label>
+        <input type="text" name="hero_card_desc" value="{{ setting.hero_card_desc }}" required />
+      </div>
+
+      <div class="form-section-divider">
+        <i class="fa-solid fa-chart-simple"></i> Tiga Metrik Statistik Hero
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Statistik 1 Angka</label>
+          <input type="text" name="hero_stat_1_num" value="{{ setting.hero_stat_1_num }}" />
+          <label class="form-label" style="margin-top: 6px;">Statistik 1 Label</label>
+          <input type="text" name="hero_stat_1_label" value="{{ setting.hero_stat_1_label }}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Statistik 2 Angka</label>
+          <input type="text" name="hero_stat_2_num" value="{{ setting.hero_stat_2_num }}" />
+          <label class="form-label" style="margin-top: 6px;">Statistik 2 Label</label>
+          <input type="text" name="hero_stat_2_label" value="{{ setting.hero_stat_2_label }}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Statistik 3 Angka</label>
+          <input type="text" name="hero_stat_3_num" value="{{ setting.hero_stat_3_num }}" />
+          <label class="form-label" style="margin-top: 6px;">Statistik 3 Label</label>
+          <input type="text" name="hero_stat_3_label" value="{{ setting.hero_stat_3_label }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: SELECTED WORK (IMAGES) ==================== -->
+  <div class="tab-pane" id="tab-work">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-images" style="color: #6a7d4e;"></i>
+        <span>Galeri Karya Pilihan (Selected Work di Beranda)</span>
+      </div>
+
+      <!-- KARYA 1 -->
+      <div class="preview-box" style="margin-bottom: 20px;">
+        <strong style="display: block; font: 700 13px 'Manrope', sans-serif; margin-bottom: 12px; color: var(--ink);">
+          1. Karya Utama Besar (Kiri)
+        </strong>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Judul Karya *</label>
+            <input type="text" name="work_1_title" value="{{ setting.work_1_title }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Label Kategori / Tahun *</label>
+            <input type="text" name="work_1_meta" value="{{ setting.work_1_meta }}" required />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Upload Gambar Karya 1</label>
+            <input type="file" name="work_1_file" accept="image/*" />
+            {% if setting.work_1_file %}
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.work_1_file.url }}" alt="Work 1 File" class="thumb-preview" />
+            </div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Atau URL Gambar Karya 1 *</label>
+            <input type="url" name="work_1_image" value="{{ setting.work_1_image }}" required />
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.get_work_1_img }}" alt="Preview 1" class="thumb-preview" onerror="this.src='https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?auto=format&fit=crop&w=400&q=80'" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARYA 2 -->
+      <div class="preview-box" style="margin-bottom: 20px;">
+        <strong style="display: block; font: 700 13px 'Manrope', sans-serif; margin-bottom: 12px; color: var(--ink);">
+          2. Karya Kanan Atas
+        </strong>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Judul Karya *</label>
+            <input type="text" name="work_2_title" value="{{ setting.work_2_title }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Label Kategori *</label>
+            <input type="text" name="work_2_meta" value="{{ setting.work_2_meta }}" required />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Upload Gambar Karya 2</label>
+            <input type="file" name="work_2_file" accept="image/*" />
+            {% if setting.work_2_file %}
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.work_2_file.url }}" alt="Work 2 File" class="thumb-preview" />
+            </div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Atau URL Gambar Karya 2 *</label>
+            <input type="url" name="work_2_image" value="{{ setting.work_2_image }}" required />
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.get_work_2_img }}" alt="Preview 2" class="thumb-preview" onerror="this.src='https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=400&q=80'" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARYA 3 -->
+      <div class="preview-box">
+        <strong style="display: block; font: 700 13px 'Manrope', sans-serif; margin-bottom: 12px; color: var(--ink);">
+          3. Karya Kanan Bawah
+        </strong>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Judul Karya *</label>
+            <input type="text" name="work_3_title" value="{{ setting.work_3_title }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Label Kategori *</label>
+            <input type="text" name="work_3_meta" value="{{ setting.work_3_meta }}" required />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Upload Gambar Karya 3</label>
+            <input type="file" name="work_3_file" accept="image/*" />
+            {% if setting.work_3_file %}
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.work_3_file.url }}" alt="Work 3 File" class="thumb-preview" />
+            </div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Atau URL Gambar Karya 3 *</label>
+            <input type="url" name="work_3_image" value="{{ setting.work_3_image }}" required />
+            <div style="margin-top: 8px;">
+              <img src="{{ setting.get_work_3_img }}" alt="Preview 3" class="thumb-preview" onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80'" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: ABOUT PAGE & STORY ==================== -->
+  <div class="tab-pane" id="tab-about">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-building" style="color: #6a7d4e;"></i>
+        <span>Halaman About Us & Cerita Studio</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Judul Hero Halaman About *</label>
+        <input type="text" name="about_hero_title" value="{{ setting.about_hero_title }}" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi Paragraf Hero About *</label>
+        <textarea name="about_hero_desc" rows="3" required>{{ setting.about_hero_desc }}</textarea>
+      </div>
+
+      <div class="form-section-divider">
+        <i class="fa-solid fa-book-open"></i> Cerita & Point of View Studio
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Heading Cerita Utama *</label>
+        <input type="text" name="about_story_heading" value="{{ setting.about_story_heading }}" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Paragraf Cerita 1 *</label>
+        <textarea name="about_story_text1" rows="3" required>{{ setting.about_story_text1 }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Paragraf Cerita 2 *</label>
+        <textarea name="about_story_text2" rows="3" required>{{ setting.about_story_text2 }}</textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Upload Gambar Studio About</label>
+          <input type="file" name="about_story_file" accept="image/*" />
+          {% if setting.about_story_file %}
+          <div style="margin-top: 8px;">
+            <img src="{{ setting.about_story_file.url }}" alt="Studio File" class="thumb-preview" />
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Atau URL Gambar Studio / Tim *</label>
+          <input type="url" name="about_story_image" value="{{ setting.about_story_image }}" required />
+          <div style="margin-top: 8px;">
+            <img src="{{ setting.get_about_story_img }}" alt="Studio Preview" class="thumb-preview" onerror="this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=400&q=80'" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 5: TIM STUDIO (NAMA, ROLE, FOTO DLL) ==================== -->
+  <div class="tab-pane" id="tab-team">
+    <div class="form-card">
+      <div class="form-card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-users" style="color: #6a7d4e;"></i>
+          <span>Manajemen Tim Studio (Halaman About)</span>
+        </div>
+        <a href="{% url 'app:team_create' %}" class="btn btn-dark btn-sm">
+          <i class="fa-solid fa-plus"></i> Tambah Anggota Tim Baru
+        </a>
+      </div>
+
+      <p style="font-size: 13px; color: var(--muted); margin: 0 0 20px;">
+        Kelola nama, jabatan (role), foto personil, keahlian software, dan tautan sosial media tim yang ditampilkan secara dinamis di halaman About.
+      </p>
+
+      {% if team_members %}
+      <div class="table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Urut</th>
+              <th>Personil</th>
+              <th>Role & Badge</th>
+              <th>Keahlian</th>
+              <th>Status</th>
+              <th style="text-align: right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in team_members %}
+            <tr>
+              <td style="font: 700 12px 'DM Mono', monospace; color: var(--muted);">#{{ m.urutan }}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <img src="{{ m.get_photo_url }}" alt="{{ m.nama }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line);" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'" />
+                  <div>
+                    <strong style="display: block; font: 700 13px 'Manrope', sans-serif; color: var(--ink);">{{ m.nama }}</strong>
+                    <small style="color: var(--muted); font-size: 11px;">{{ m.email|default:"-" }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div style="font-weight: 600; font-size: 12px; color: var(--ink);">{{ m.role }}</div>
+                <span class="status-badge" style="background: rgba(200,241,105,.2); color: #354920; font-size: 9px; padding: 2px 7px;">{{ m.role_badge }}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  {% for k in m.get_keahlian_list %}
+                  <span style="background: #f1f2ec; font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #555d4e;">{{ k }}</span>
+                  {% empty %}
+                  <span style="color: var(--muted); font-size: 11px;">-</span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td>
+                {% if m.aktif %}
+                <span class="status-badge status-active">Aktif</span>
+                {% else %}
+                <span class="status-badge status-inactive">Nonaktif</span>
+                {% endif %}
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
+                <div style="display: inline-flex; gap: 6px;">
+                  <a href="{% url 'app:team_toggle_active' m.id %}" class="btn btn-outline btn-sm" style="padding: 5px 8px; font-size: 11px;">
+                    {% if m.aktif %}<i class="fa-solid fa-eye-slash"></i> Sembunyikan{% else %}<i class="fa-solid fa-eye"></i> Tampilkan{% endif %}
+                  </a>
+                  <a href="{% url 'app:team_edit' m.id %}" class="btn btn-outline btn-sm" style="padding: 5px 8px; font-size: 11px;">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                  </a>
+                  <form method="POST" action="{% url 'app:team_delete' m.id %}" style="display: inline;" onsubmit="return confirm('Hapus {{ m.nama|escapejs }}?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm" style="padding: 5px 8px; color: #c94a4a; font-size: 11px;">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="padding: 30px; text-align: center; border: 1px dashed var(--line); border-radius: 14px;">
+        <p style="color: var(--muted); font-size: 13px; margin: 0 0 12px;">Belum ada anggota tim terdaftar.</p>
+        <a href="{% url 'app:team_create' %}" class="btn btn-dark btn-sm">
+          <i class="fa-solid fa-plus"></i> Tambah Anggota Sekarang
+        </a>
+      </div>
+      {% endif %}
+
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--muted);">Buka halaman manajemen tim khusus untuk reordering dan pengelolaan penuh:</span>
+        <a href="{% url 'app:team_list' %}" class="btn btn-outline btn-sm">
+          Buka Manajemen Tim Penuh ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 6: FOOTER & KONTAK ==================== -->
+  <div class="tab-pane" id="tab-footer">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-shoe-prints" style="color: #6a7d4e;"></i>
+        <span>Pengaturan Footer & Informasi Kontak Studio</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi Bio Footer Studio *</label>
+        <textarea name="footer_desc" rows="3" required>{{ setting.footer_desc }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Lencana Status Kapasitas Studio *</label>
+        <input type="text" name="studio_status_text" value="{{ setting.studio_status_text }}" required placeholder="STUDIO STATUS: READY FOR NEW PROJECTS" />
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Alamat Fisik Studio *</label>
+          <input type="text" name="address" value="{{ setting.address }}" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Jam Operasional Studio *</label>
+          <input type="text" name="operational_hours" value="{{ setting.operational_hours }}" required />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Email Resmi Studio *</label>
+          <input type="email" name="email" value="{{ setting.email }}" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nomor WhatsApp Studio *</label>
+          <input type="text" name="phone_wa" value="{{ setting.phone_wa }}" required />
+        </div>
+      </div>
+
+      <div class="form-section-divider">
+        <i class="fa-solid fa-share-nodes"></i> URL Tautan Sosial Media Studio
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Instagram URL</label>
+          <input type="url" name="social_instagram" value="{{ setting.social_instagram }}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">YouTube URL</label>
+          <input type="url" name="social_youtube" value="{{ setting.social_youtube }}" />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">TikTok URL</label>
+          <input type="url" name="social_tiktok" value="{{ setting.social_tiktok }}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">LinkedIn URL</label>
+          <input type="url" name="social_linkedin" value="{{ setting.social_linkedin }}" />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Behance URL</label>
+          <input type="url" name="social_behance" value="{{ setting.social_behance }}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teks Hak Cipta Footer *</label>
+          <input type="text" name="footer_copyright" value="{{ setting.footer_copyright }}" required />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 7: MIDTRANS PAYMENT GATEWAY ==================== -->
+  <div class="tab-pane" id="tab-midtrans">
+    <div class="form-card">
+      <div class="form-card-title">
+        <i class="fa-solid fa-credit-card" style="color: #6a7d4e;"></i>
+        <span>Integrasi Payment Gateway Midtrans (Sandbox & Production)</span>
+      </div>
+
+      <div style="background: #fdfaf0; border: 1px solid #fae392; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #7a5802; line-height: 1.6;">
+        <i class="fa-solid fa-circle-info" style="color: #d48806; margin-right: 6px;"></i>
+        <strong>API Gateway Terpasang:</strong> Midtrans Snap Payment Gateway memungkinkan pembayaran otomatis untuk pesanan layanan via QRIS, BCA/Mandiri/BNI/BRI Virtual Account, Kartu Kredit, dan e-Wallet.
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">Midtrans Server Key *</label>
+          <input type="text" name="midtrans_server_key" value="{{ setting.midtrans_server_key|default:'SB-Mid-server-huy54.WVwscvTpLWU_BUjJf4' }}" required style="font-family: 'DM Mono', monospace;" />
+          <small class="form-hint">Server Key dari Midtrans Dashboard (Sandbox diawali <code>SB-Mid-server-...</code>).</small>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Midtrans Client Key (Opsional)</label>
+          <input type="text" name="midtrans_client_key" value="{{ setting.midtrans_client_key }}" placeholder="SB-Mid-client-..." style="font-family: 'DM Mono', monospace;" />
+          <small class="form-hint">Client Key publik dari dashboard Midtrans.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mode Lingkungan (Environment)</label>
+          <div style="padding: 12px 0 0;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+              <input type="checkbox" name="midtrans_is_production" {% if setting.midtrans_is_production %}checked{% endif %} style="width: 18px; height: 18px;" />
+              <span>Aktifkan Mode Produksi (Production Live)</span>
+            </label>
+            <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+              Biarkan tidak dicentang untuk menggunakan <b>Sandbox Simulator Testing</b>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-divider">
+        <i class="fa-solid fa-network-wired"></i> Endpoint & Webhook Information
+      </div>
+
+      <div style="background: #fafbf8; border: 1px solid var(--line); border-radius: 14px; padding: 18px; font-size: 12px; line-height: 1.8; color: var(--ink);">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #dcdfd7; padding-bottom: 8px; margin-bottom: 8px;">
+          <span style="color: var(--muted);">Notification / Webhook URL:</span>
+          <span style="font-family: 'DM Mono', monospace; font-weight: 700; color: #2e7d32;">http://127.0.0.1:8000/payment/notification/</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #dcdfd7; padding-bottom: 8px; margin-bottom: 8px;">
+          <span style="color: var(--muted);">Redirect Finish URL:</span>
+          <span style="font-family: 'DM Mono', monospace; font-weight: 700;">http://127.0.0.1:8000/payment/finish/</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--muted);">Midtrans Simulator:</span>
+          <a href="https://simulator.sandbox.midtrans.com/" target="_blank" rel="noopener" style="color: #4a875f; font-weight: 700; text-decoration: underline;">
+            https://simulator.sandbox.midtrans.com/ ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING / BOTTOM SUBMIT BUTTON -->
+  <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+    <a href="{% url 'app:dashboard' %}" class="btn btn-outline">Batal</a>
+    <button type="submit" class="btn btn-dark" style="padding: 14px 32px; font-size: 13px;">
+      <i class="fa-solid fa-floppy-disk"></i> Simpan Seluruh Pengaturan Web
+    </button>
+  </div>
+</form>
+
+<script>
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.setting-tab').forEach(el => el.classList.remove('active'));
+    
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+</script>
+{% endblock %}

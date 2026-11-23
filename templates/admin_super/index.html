@@ -1,68 +1,270 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Dashboard Admin — Sistem Manajemen{% endblock %}
-{% block role_label %}Super Admin{% endblock %}
+{% block title %}Dashboard Admin — FRAMEHAUS Management{% endblock %}
 {% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
 
 {% block sidebar_nav %}
-<p class="nav-section-label">Menu</p>
-<a href="{% url 'app:dashboard' %}" class="nav-item active">
-  <i class="fa-solid fa-chart-pie"></i> Dashboard
+<a href="{% url 'app:dashboard' %}" class="active">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
 </a>
-<a href="{% url 'app:user_list' %}" class="nav-item">
-  <i class="fa-solid fa-users"></i> Manajemen User
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
 </a>
-<p class="nav-section-label">Akun</p>
-<a href="{% url 'app:profile_admin' %}" class="nav-item">
-  <i class="fa-solid fa-circle-user"></i> Profil Admin
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
 </a>
 {% endblock %}
 
-{% block page_title %}Dashboard{% endblock %}
-{% block page_subtitle %}Selamat datang, {{ request.user.first_name }}{% endblock %}
+{% block page_title %}Admin Overview{% endblock %}
+{% block page_subtitle %}Selamat datang kembali, {{ request.user.first_name|default:request.user.username }}. Ini ringkasan sistem studio, katalog layanan, artikel, & pesanan masuk.{% endblock %}
 
 {% block page_body %}
-<div class="stats-grid">
-  <div class="stat-card" style="--card-accent: rgba(99,102,241,0.15); --card-color: #818cf8;">
-    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-    <div class="stat-value">{{ total_pengguna }}</div>
-    <div class="stat-label">Total Pengguna Terdaftar</div>
+<!-- METRICS -->
+<div class="metric-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="metric">
+    <small>Total Layanan Aktif</small>
+    <strong>{{ total_layanan|default:"0" }}</strong>
+    <span><a href="{% url 'app:service_list' %}" style="color: inherit; text-decoration: underline;">↗ Kelola Katalog</a></span>
   </div>
-  <div class="stat-card" style="--card-accent: rgba(14,165,233,0.15); --card-color: #38bdf8;">
-    <div class="stat-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-    <div class="stat-value">{{ total_provinsi }}</div>
-    <div class="stat-label">Provinsi Aktif</div>
+
+  <div class="metric">
+    <small>Total Artikel & Journal</small>
+    <strong>{{ total_artikel|default:"0" }}</strong>
+    <span><a href="{% url 'app:article_list' %}" style="color: inherit; text-decoration: underline;">↗ Kelola Konten</a></span>
   </div>
-  <div class="stat-card" style="--card-accent: rgba(34,197,94,0.15); --card-color: #4ade80;">
-    <div class="stat-icon"><i class="fa-solid fa-shield-check"></i></div>
-    <div class="stat-value">1</div>
-    <div class="stat-label">Akun Admin Aktif</div>
+
+  <div class="metric">
+    <small>Total Pesanan Masuk</small>
+    <strong>{{ total_pesanan|default:"0" }}</strong>
+    <span>{{ inprogress_pesanan|default:"0" }} sedang diproses</span>
+  </div>
+
+  <div class="metric">
+    <small>Total Pengguna</small>
+    <strong>{{ total_pengguna }}</strong>
+    <span><a href="{% url 'app:user_list' %}" style="color: inherit; text-decoration: underline;">↗ {{ total_provinsi }} provinsi terhubung</a></span>
   </div>
 </div>
 
-<!-- Quick links -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-  <a href="{% url 'app:user_list' %}" class="form-card" style="display:block; text-decoration:none; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-    <div style="display:flex; align-items:center; gap:16px;">
-      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 6px 20px rgba(99,102,241,0.4);">
+<!-- ORDERS MANAGEMENT PANEL -->
+<div class="dash-panel" style="margin-top: 24px;">
+  <div class="panel-head">
+    <div>
+      <h3>Daftar Pesanan Masuk</h3>
+      <span class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">
+        LIVE ORDERS DARI PENGGUNA TERDAFTAR
+      </span>
+    </div>
+    <span class="badge badge-primary">Total: {{ total_pesanan|default:"0" }}</span>
+  </div>
+
+  {% if pesanan_list %}
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Pelanggan</th>
+          <th>Layanan</th>
+          <th>Footage Klien</th>
+          <th>Tanggal</th>
+          <th>Total</th>
+          <th>Status Produksi</th>
+          <th>Pembayaran Midtrans</th>
+          <th style="text-align: right;">Ubah Status & Tindakan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pesanan in pesanan_list %}
+        <tr>
+          <td style="font-family: 'DM Mono', monospace; font-weight: 700; color: var(--ink);">
+            <a href="{% url 'payment_page' pesanan.clean_order_id %}" target="_blank" style="color: inherit; text-decoration: underline;" title="Buka Detail Pembayaran">
+              {{ pesanan.order_id }} ↗
+            </a>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 12px; color: var(--ink);">
+              {{ pesanan.user.first_name|default:pesanan.user.username }}
+            </div>
+            <div style="font-size: 10px; color: var(--muted);">{{ pesanan.user.email }}</div>
+          </td>
+          <td style="font-size: 12px; color: var(--ink); max-width: 220px;">
+            {{ pesanan.layanan_nama }}
+          </td>
+          <td>
+            {% if pesanan.video_link %}
+              <a href="{{ pesanan.video_link }}" target="_blank" rel="noopener noreferrer" class="status done" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 11px;" title="{{ pesanan.video_link }}">
+                <i class="fa-solid fa-cloud"></i> Buka Drive ↗
+              </a>
+            {% elif pesanan.video_file %}
+              <a href="{{ pesanan.video_file.url }}" download class="status done" style="background: #edf8ee; color: #2e7d32; border: 1px solid #c8e6c9; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 11px;" title="{{ pesanan.footage_filename }}">
+                <i class="fa-solid fa-file-video"></i> Unduh File ⬇
+              </a>
+            {% else %}
+              <span class="status" style="background: #fff8e1; color: #b78103; border: 1px dashed #ffe082; font-size: 10px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-clock"></i> Belum Kirim
+              </span>
+            {% endif %}
+          </td>
+          <td style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);">
+            {{ pesanan.created_at|date:"d M Y, H:i" }}
+          </td>
+          <td style="font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--ink);">
+            Rp{{ pesanan.total_harga }}
+          </td>
+          <td>
+            {% if pesanan.status == 'Completed' %}
+              <span class="status done">● Selesai</span>
+            {% elif pesanan.status == 'In progress' %}
+              <span class="status progress">● Diproses</span>
+            {% elif pesanan.status == 'Cancelled' %}
+              <span class="status cancel">● Dibatalkan</span>
+            {% else %}
+              <span class="status" style="background: #eef2e5; color: #556b2f;">● {{ pesanan.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if pesanan.payment_status == 'settlement' %}
+              <span class="status done" style="background: #edf8ee; color: #2e7d32; border: 1px solid #c8e6c9;">● Lunas</span>
+              {% if pesanan.payment_type %}
+                <div style="font-size: 9px; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; margin-top: 2px;">{{ pesanan.payment_type }}</div>
+              {% endif %}
+            {% elif pesanan.payment_status == 'pending' %}
+              <span class="status progress" style="background: #fff8e1; color: #b78103; border: 1px solid #ffe082;">● Pending</span>
+            {% elif pesanan.payment_status == 'cancel' or pesanan.payment_status == 'expire' %}
+              <span class="status cancel" style="background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;">● {{ pesanan.get_payment_status_display }}</span>
+            {% else %}
+              <span class="status" style="background: #f0f2ed; color: #555e50; border: 1px solid #dcdfd7;">● Belum Bayar</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            <form method="POST" action="{% url 'app:order_status_update' pesanan.order_id %}" style="display: inline-flex; gap: 6px; align-items: center; margin-right: 6px;">
+              {% csrf_token %}
+              <select name="status" onchange="this.form.submit()" style="padding: 5px 8px; font-size: 11px; border-radius: 8px; border: 1px solid var(--line); background: #fafbf8; outline: 0; cursor: pointer;">
+                <option value="In progress" {% if pesanan.status == 'In progress' %}selected{% endif %}>Diproses</option>
+                <option value="Completed" {% if pesanan.status == 'Completed' %}selected{% endif %}>Selesai</option>
+                <option value="Pending" {% if pesanan.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Cancelled" {% if pesanan.status == 'Cancelled' %}selected{% endif %}>Batal</option>
+              </select>
+            </form>
+            <form method="POST" action="{% url 'app:order_delete' pesanan.order_id %}" style="display: inline;" onsubmit="return confirm('Hapus pesanan {{ pesanan.order_id }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger" style="padding: 5px 8px; font-size: 10px;" title="Hapus Pesanan">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-inbox"></i>
+    <p>Belum ada pesanan masuk dari pengguna.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- QUICK LINKS -->
+<div class="dash-panel" style="margin-top: 24px;">
+  <div class="panel-head">
+    <h3>Akses Cepat Pengelolaan CRUD</h3>
+    <span class="mono" style="font-size: 10px; color: var(--muted);">WORKSPACE SHORTCUTS</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+    <a href="{% url 'app:web_settings' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: var(--lime);">
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      <div class="quick-card-text">
+        <h4>Pengaturan Web & Branding</h4>
+        <p>Ubah nama web, logo, video hero, teks/gambar karya, dan footer secara real-time.</p>
+      </div>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+
+    <a href="{% url 'app:team_list' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: #e2e8d8;">
+        <i class="fa-solid fa-id-badge"></i>
+      </div>
+      <div class="quick-card-text">
+        <h4>Manajemen Tim Studio</h4>
+        <p>Kelola nama, jabatan, foto, bio, keahlian software, dan link medsos tim.</p>
+      </div>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+
+    <a href="{% url 'app:service_list' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: var(--lime);">
+        <i class="fa-solid fa-film"></i>
+      </div>
+      <div class="quick-card-text">
+        <h4>Kelola Layanan Studio</h4>
+        <p>Tambah, edit harga & deskripsi, atau nonaktifkan paket layanan video.</p>
+      </div>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+
+    <a href="{% url 'app:article_list' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: #e2e8d8;">
+        <i class="fa-solid fa-newspaper"></i>
+      </div>
+      <div class="quick-card-text">
+        <h4>Kelola Artikel & Journal</h4>
+        <p>Publikasikan insight kreatif, panduan teknis, dan artikel video editing.</p>
+      </div>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+
+    <a href="{% url 'app:user_list' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: #eef2e5;">
         <i class="fa-solid fa-users-gear"></i>
       </div>
-      <div>
-        <div style="font-size:16px;font-weight:700;color:var(--text);">Manajemen User</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:3px;">Lihat, edit, dan kelola semua pengguna</div>
+      <div class="quick-card-text">
+        <h4>Manajemen Data Pengguna</h4>
+        <p>Lihat direktori anggota, aktivasi akun, kelola status, dan edit data profil.</p>
       </div>
-    </div>
-  </a>
-  <a href="{% url 'app:profile_admin' %}" class="form-card" style="display:block; text-decoration:none; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-    <div style="display:flex; align-items:center; gap:16px;">
-      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 6px 20px rgba(14,165,233,0.4);">
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+
+    <a href="{% url 'app:profile_admin' %}" class="quick-card">
+      <div class="quick-card-icon" style="background: #eaece4;">
         <i class="fa-solid fa-id-card"></i>
       </div>
-      <div>
-        <div style="font-size:16px;font-weight:700;color:var(--text);">Profil Admin</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:3px;">Perbarui data dan foto profil Anda</div>
+      <div class="quick-card-text">
+        <h4>Profil Administrator</h4>
+        <p>Atur nomor telepon, jenis kelamin, dan foto identitas resmi administrator.</p>
       </div>
-    </div>
-  </a>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left: auto; color: var(--muted); font-size: 13px;"></i>
+    </a>
+  </div>
 </div>
 {% endblock %}

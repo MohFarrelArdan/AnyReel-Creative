@@ -1,0 +1,817 @@
+{% extends 'public_base.html' %}
+
+{% block title %}{{ article.judul }} — FRAMEHAUS Journal{% endblock %}
+
+{% block public_extra_styles %}
+/* READING PROGRESS BAR */
+#readingBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--lime-dark);
+  z-index: 999;
+  width: 0%;
+  transition: width 0.1s ease-out;
+}
+
+/* BLOGGER LAYOUT */
+.blogger-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+  margin-top: 24px;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.breadcrumb a {
+  color: #61675a;
+  transition: color .2s;
+}
+.breadcrumb a:hover { color: var(--ink); text-decoration: underline; }
+.breadcrumb span.sep { color: #b7bdae; font-size: 10px; }
+
+/* POST HEADER */
+.post-header {
+  margin-bottom: 28px;
+}
+.post-cat-badge {
+  display: inline-block;
+  background: rgba(200,241,105,.28);
+  color: #3b4d1b;
+  font: 700 10px 'DM Mono', monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+.post-title {
+  font: 800 clamp(28px, 4.2vw, 44px)/1.15 'Manrope', sans-serif;
+  letter-spacing: -.05em;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+.post-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.author-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font: 800 15px 'Manrope', sans-serif;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+.author-text strong {
+  display: block;
+  font: 700 13px 'Manrope', sans-serif;
+  color: var(--ink);
+}
+.author-text span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* SHARE BAR */
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 28px;
+  padding: 12px 18px;
+  background: #edf0e6;
+  border-radius: 14px;
+  font-size: 12px;
+  color: #636b5c;
+  flex-wrap: wrap;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #d9dcd2;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s var(--spring);
+}
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+/* POST COVER */
+.post-cover-wrap {
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+  background: #dce1d5;
+  max-height: 480px;
+}
+.post-cover-img {
+  width: 100%;
+  height: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  display: block;
+}
+.post-caption {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* BLOGGER CONTENT BODY */
+.post-body {
+  font-size: 16px;
+  line-height: 1.88;
+  color: #2c3229;
+}
+.post-body p {
+  margin-bottom: 22px;
+}
+.lead-box {
+  background: #fff;
+  border-left: 4px solid var(--lime-dark);
+  border-radius: 0 16px 16px 0;
+  padding: 22px 26px;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 24px rgba(23,28,21,.04);
+  font: 500 17px/1.7 'Manrope', sans-serif;
+  color: #3b4237;
+}
+.post-body h2 {
+  font: 800 24px/1.25 'Manrope', sans-serif;
+  letter-spacing: -.04em;
+  margin: 36px 0 16px;
+  color: var(--ink);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.post-body h3 {
+  font: 700 20px/1.3 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+  margin: 28px 0 12px;
+  color: var(--ink);
+}
+.post-body blockquote {
+  margin: 30px 0;
+  padding: 22px 28px;
+  background: #edf0e6;
+  border-left: 4px solid var(--dark);
+  border-radius: 0 16px 16px 0;
+  font: italic 600 17px/1.6 'Manrope', sans-serif;
+  color: var(--ink);
+}
+.tip-box {
+  background: rgba(200,241,105,.18);
+  border: 1px solid rgba(200,241,105,.45);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin: 28px 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.tip-box i {
+  font-size: 22px;
+  color: #557519;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tip-box h4 {
+  font: 700 14px 'Manrope', sans-serif;
+  color: #2f4010;
+  margin: 0 0 6px;
+}
+.tip-box p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #424e29;
+  margin: 0;
+}
+
+/* AUTHOR BIO BOX */
+.author-bio-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin: 44px 0 36px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.04);
+}
+.author-bio-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font: 800 24px 'Manrope', sans-serif;
+  flex-shrink: 0;
+}
+.author-bio-info h3 {
+  font: 800 18px 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+.author-bio-info span {
+  font-size: 11px;
+  color: #7b8374;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+.author-bio-info p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #646a5d;
+  margin: 8px 0 0;
+}
+
+/* PREV / NEXT NAV */
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 44px;
+}
+.post-nav-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+  transition: all 0.25s var(--spring);
+  text-decoration: none;
+}
+.post-nav-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: #c9ccc1;
+}
+.post-nav-card small {
+  font: 700 10px 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  display: block;
+  margin-bottom: 6px;
+}
+.post-nav-card strong {
+  font: 700 14px 'Manrope', sans-serif;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* BLOGGER COMMENTS SECTION */
+.comments-section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 36px;
+  margin-bottom: 40px;
+}
+.comments-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+.comments-head h3 {
+  font: 800 22px 'Manrope', sans-serif;
+  letter-spacing: -.04em;
+  margin: 0;
+}
+.comment-item {
+  display: flex;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid #f1f2ec;
+}
+.comment-item:last-child { border-bottom: 0; }
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e4e7dc;
+  color: #3b4237;
+  display: grid;
+  place-items: center;
+  font: 700 14px 'Manrope', sans-serif;
+  flex-shrink: 0;
+}
+.comment-body h4 {
+  font: 700 13px 'Manrope', sans-serif;
+  margin: 0 0 3px;
+  color: var(--ink);
+}
+.comment-body time {
+  font: 10px 'DM Mono', monospace;
+  color: #8c9385;
+  display: block;
+  margin-bottom: 8px;
+}
+.comment-body p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #555c4f;
+  margin: 0;
+}
+
+/* COMMENT FORM */
+.comment-form {
+  background: #fafbf8;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  margin-top: 28px;
+}
+.comment-form h4 {
+  font: 800 16px 'Manrope', sans-serif;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.comment-form p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+/* SIDEBAR (BLOGGER STYLE) */
+.blogger-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.sidebar-widget {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+}
+.widget-title {
+  font: 800 15px 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.widget-title small {
+  font: 700 9px 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* POPULAR POST ITEM */
+.pop-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f4ec;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.pop-item:last-child { border-bottom: 0; }
+.pop-item:hover strong { color: #587922; }
+.pop-thumb {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e2e6dc;
+  flex-shrink: 0;
+}
+.pop-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pop-info strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 700 12px/1.4 'Manrope', sans-serif;
+  color: var(--ink);
+  transition: color 0.2s;
+}
+.pop-info span {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* CATEGORY PILL LIST */
+.cat-pill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cat-pill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #fafbf8;
+  font-size: 12px;
+  color: #4e5549;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.cat-pill-item:hover {
+  background: var(--dark);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+/* PROMO BANNER IN SIDEBAR */
+.sidebar-promo {
+  background: var(--dark);
+  border-radius: 20px;
+  padding: 26px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.sidebar-promo h3 {
+  font: 800 20px 'Manrope', sans-serif;
+  margin: 10px 0 8px;
+  letter-spacing: -.04em;
+}
+.sidebar-promo p {
+  font-size: 12px;
+  color: #adb3a8;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 992px) {
+  .blogger-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+@media (max-width: 600px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-meta-bar { flex-direction: column; align-items: flex-start; }
+  .comments-section { padding: 22px; }
+}
+{% endblock %}
+
+{% block page_content %}
+<!-- TOP READING PROGRESS BAR -->
+<div id="readingBar"></div>
+
+<div class="wrap" style="padding-top: 36px; padding-bottom: 60px;">
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a href="{% url 'home' %}"><i class="fa-solid fa-house" style="font-size: 11px; margin-right: 4px;"></i> Home</a>
+    <span class="sep">/</span>
+    <a href="{% url 'artikel' %}">Journal & Insights</a>
+    <span class="sep">/</span>
+    <a href="{% url 'artikel' %}?category={{ article.kategori }}">{{ article.get_kategori_display }}</a>
+    <span class="sep">/</span>
+    <span style="color: var(--ink); font-weight: 600;">{{ article.judul|truncatechars:45 }}</span>
+  </nav>
+
+  <div class="blogger-layout">
+    <!-- MAIN COLUMN: ARTICLE POST & BLOGGER CONTENT -->
+    <article class="post-column">
+      <header class="post-header">
+        <span class="post-cat-badge">{{ article.get_kategori_display }}</span>
+        <h1 class="post-title">{{ article.judul }}</h1>
+
+        <div class="post-meta-bar">
+          <div class="author-info">
+            <div class="author-avatar">{{ article.penulis|first|upper|default:"F" }}</div>
+            <div class="author-text">
+              <strong>{{ article.penulis }}</strong>
+              <span>Dipublikasikan pada {{ article.created_at|date:"d F Y" }}</span>
+            </div>
+          </div>
+          <div class="post-stats">
+            <span><i class="fa-regular fa-clock" style="margin-right: 5px;"></i>{{ article.estimasi_baca }}</span>
+            <span><i class="fa-regular fa-comment" style="margin-right: 5px;"></i>{{ comment_count }} Komentar</span>
+          </div>
+        </div>
+
+        <!-- SOCIAL SHARE BUTTONS -->
+        <div class="share-bar">
+          <span style="font-weight: 700; color: var(--ink);"><i class="fa-solid fa-share-nodes" style="margin-right: 4px;"></i> Bagikan:</span>
+          <button class="share-btn" onclick="shareWhatsApp()"><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp</button>
+          <button class="share-btn" onclick="shareTwitter()"><i class="fa-brands fa-x-twitter"></i> X (Twitter)</button>
+          <button class="share-btn" onclick="shareFacebook()"><i class="fa-brands fa-facebook" style="color: #1877F2;"></i> Facebook</button>
+          <button class="share-btn" onclick="copyArticleLink()"><i class="fa-regular fa-copy"></i> Salin Link</button>
+        </div>
+      </header>
+
+      <!-- FEATURED COVER PHOTO -->
+      <div class="post-cover-wrap">
+        <img class="post-cover-img" src="{{ article.get_image_url }}" alt="{{ article.judul }}" onerror="this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=85'" />
+      </div>
+      <div class="post-caption">Dokumentasi & Editorial FRAMEHAUS Studio: {{ article.judul }}</div>
+
+      <!-- ARTICLE BODY (BLOGGER TYPOGRAPHY) -->
+      <div class="post-body">
+        <div class="lead-box">
+          {{ article.ringkasan }}
+        </div>
+
+        <p>{{ article.konten|linebreaksbr }}</p>
+
+        <!-- PRO TIP CALLOUT BOX -->
+        <div class="tip-box">
+          <i class="fa-solid fa-lightbulb"></i>
+          <div>
+            <h4>💡 Pro Tip dari Editor FRAMEHAUS</h4>
+            <p>Eksperimen dengan potongan audio (J-Cut dan L-Cut) sebelum menerapkan transisi visual. Ketika audio mendahului visual sebesar 0.5 detik, otak penonton menerima pergantian adegan 40% lebih alami tanpa disadari.</p>
+          </div>
+        </div>
+
+        <blockquote>
+          “Editing bukan sekadar menyambung potongan gambar; ini adalah seni mengatur detak jantung dan emosi orang yang sedang menonton.”
+        </blockquote>
+
+        <p>
+          Bagi kreator dan tim pemasaran digital yang memproduksi video dalam volume besar, membangun konsistensi visual melalui color LUT yang tepat dan library sound design eksklusif adalah pembeda utama antara konten biasa dan konten yang melekat di benak pemirsa.
+        </p>
+
+        <!-- TAGS -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line);">
+          <span style="font: 700 11px 'DM Mono', monospace; color: var(--muted); align-self: center;">TAGS:</span>
+          <span class="badge badge-primary">#{{ article.kategori }}</span>
+          <span class="badge badge-primary">#videoediting</span>
+          <span class="badge badge-primary">#framehaus</span>
+          <span class="badge badge-primary">#cinematic</span>
+          <span class="badge badge-primary">#creativestudio</span>
+        </div>
+      </div>
+
+      <!-- AUTHOR BIO CARD -->
+      <div class="author-bio-card">
+        <div class="author-bio-avatar">{{ article.penulis|first|upper|default:"F" }}</div>
+        <div class="author-bio-info">
+          <span>Ditulis oleh</span>
+          <h3>{{ article.penulis }}</h3>
+          <p>Anggota tim editorial FRAMEHAUS Studio dengan spesialisasi pada workflow video modern, kurasi estetika visual, dan riset retensi audiens di era media digital.</p>
+        </div>
+      </div>
+
+      <!-- PREVIOUS / NEXT NAVIGATION -->
+      <div class="post-nav">
+        {% if prev_article %}
+        <a href="{% url 'artikel_detail' prev_article.id %}" class="post-nav-card">
+          <small>← Artikel Sebelumnya</small>
+          <strong>{{ prev_article.judul }}</strong>
+        </a>
+        {% else %}
+        <div class="post-nav-card" style="opacity: .5; pointer-events: none;">
+          <small>Artikel Sebelumnya</small>
+          <strong>Ini adalah artikel pertama</strong>
+        </div>
+        {% endif %}
+
+        {% if next_article %}
+        <a href="{% url 'artikel_detail' next_article.id %}" class="post-nav-card" style="text-align: right;">
+          <small>Artikel Selanjutnya →</small>
+          <strong>{{ next_article.judul }}</strong>
+        </a>
+        {% else %}
+        <div class="post-nav-card" style="text-align: right; opacity: .5; pointer-events: none;">
+          <small>Artikel Selanjutnya</small>
+          <strong>Ini adalah artikel terbaru</strong>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- COMMENTS SECTION -->
+      <section class="comments-section" id="comments">
+        <div class="comments-head">
+          <h3>Diskusi & Komentar ({{ comment_count }})</h3>
+          <span class="mono" style="font-size: 11px; color: var(--muted);">BLOGGER DISCUSSION</span>
+        </div>
+
+        {% if comments %}
+          {% for c in comments %}
+          <div class="comment-item">
+            <div class="comment-avatar">{{ c.nama|first|upper }}</div>
+            <div class="comment-body">
+              <h4>{{ c.nama }}</h4>
+              <time>{{ c.created_at|date:"d M Y, H:i" }} WIB</time>
+              <p>{{ c.pesan }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align: center; padding: 30px; color: var(--muted); font-size: 13px;">
+            <i class="fa-regular fa-comments" style="font-size: 32px; opacity: .3; margin-bottom: 10px; display: block;"></i>
+            Belum ada komentar untuk artikel ini. Jadilah yang pertama memberikan pandangan Anda!
+          </div>
+        {% endif %}
+
+        <!-- FORM TULIS KOMENTAR -->
+        <form method="POST" action="" class="comment-form">
+          {% csrf_token %}
+          <h4>Tinggalkan Komentar</h4>
+          <p>Alamat email Anda tidak akan dipublikasikan. Komentar yang sopan membantu diskusi yang berkualitas.</p>
+
+          <div class="field-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="field" style="margin: 0;">
+              <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px;">Nama Anda <span style="color: #d9534f;">*</span></label>
+              <input type="text" name="nama" required placeholder="Nama lengkap Anda" style="width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; font-size: 12px; outline: 0; background: #fff;" />
+            </div>
+            <div class="field" style="margin: 0;">
+              <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px;">Email Anda <span style="color: #d9534f;">*</span></label>
+              <input type="email" name="email" required placeholder="email@contoh.com" style="width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; font-size: 12px; outline: 0; background: #fff;" />
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px;">Komentar / Pertanyaan <span style="color: #d9534f;">*</span></label>
+            <textarea name="pesan" rows="4" required placeholder="Tuliskan komentar atau tanggapan Anda mengenai artikel ini..." style="width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; font-size: 12px; outline: 0; background: #fff;"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-dark" style="font-size: 12px; padding: 12px 24px;">
+            <i class="fa-solid fa-paper-plane"></i> Publikasikan Komentar
+          </button>
+        </form>
+      </section>
+    </article>
+
+    <!-- RIGHT SIDEBAR (CLASSIC BLOGGER WIDGETS) -->
+    <aside class="blogger-sidebar">
+      <!-- SEARCH WIDGET -->
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Cari Artikel</span>
+          <small>JOURNAL SEARCH</small>
+        </div>
+        <form method="GET" action="{% url 'artikel' %}">
+          <div class="search-box" style="width: 100%;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" placeholder="Ketik kata kunci…" autocomplete="off" />
+          </div>
+        </form>
+      </div>
+
+      <!-- ABOUT STUDIO WIDGET -->
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Tentang FRAMEHAUS</span>
+          <small>THE STUDIO</small>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span class="brand-mark" style="width: 28px; height: 28px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width: 14px; height: 14px;"><path d="M5 4h14v16H5z"/><path d="m10 8 6 4-6 4z"/></svg>
+          </span>
+          <strong style="font: 800 16px 'Manrope', sans-serif;">FRAMEHAUS Studio</strong>
+        </div>
+        <p style="font-size: 12px; color: #727a6c; line-height: 1.65; margin: 0 0 16px;">
+          Studio video editing independen yang memadukan storytelling, visual aesthetic, dan sound design berkualitas industri.
+        </p>
+        <a href="{% url 'about' %}" class="btn btn-outline btn-sm" style="width: 100%;">Kenali Studio Kami ↗</a>
+      </div>
+
+      <!-- POPULAR ARTICLES WIDGET -->
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Artikel Populer</span>
+          <small>TOP READS</small>
+        </div>
+        {% for pop in popular_articles %}
+        <a href="{% url 'artikel_detail' pop.id %}" class="pop-item">
+          <div class="pop-thumb">
+            <img src="{{ pop.get_image_url }}" alt="{{ pop.judul }}" onerror="this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=150&q=80'" />
+          </div>
+          <div class="pop-info">
+            <strong>{{ pop.judul }}</strong>
+            <span><i class="fa-regular fa-clock" style="margin-right: 3px;"></i>{{ pop.estimasi_baca }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- CATEGORIES WIDGET -->
+      <div class="sidebar-widget">
+        <div class="widget-title">
+          <span>Kategori Topik</span>
+          <small>TOPICS</small>
+        </div>
+        <div class="cat-pill-list">
+          {% for code, label in categories %}
+          <a href="{% url 'artikel' %}?category={{ code }}" class="cat-pill-item">
+            <span>{{ label }}</span>
+            <i class="fa-solid fa-arrow-right" style="font-size: 10px; color: var(--muted);"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- PROMO CTA WIDGET -->
+      <div class="sidebar-promo">
+        <span class="mono" style="font-size: 9px; color: var(--lime); letter-spacing: .1em; text-transform: uppercase;">READY TO CREATE?</span>
+        <h3>Butuh Editor Video Profesional?</h3>
+        <p>Pilih paket editing di katalog kami atau gunakan kalkulator harga langsung.</p>
+        <a href="{% url 'shop' %}" class="btn btn-lime btn-sm" style="width: 100%;">
+          Jelajahi Paket Layanan ↗
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- READING PROGRESS BAR & SHARE SCRIPT -->
+<script>
+  window.addEventListener('scroll', () => {
+    const docEl = document.documentElement;
+    const scrollTop = docEl.scrollTop || document.body.scrollTop;
+    const scrollHeight = docEl.scrollHeight - docEl.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    const bar = document.getElementById('readingBar');
+    if (bar) bar.style.width = progress + '%';
+  });
+
+  function shareWhatsApp() {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("Baca artikel menarik ini di FRAMEHAUS Journal: {{ article.judul|escapejs }} ");
+    window.open(`https://api.whatsapp.com/send?text=${text}${url}`, '_blank');
+  }
+
+  function shareTwitter() {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("{{ article.judul|escapejs }} via @framehaus_studio");
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  }
+
+  function shareFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  }
+
+  function copyArticleLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert("Tautan artikel berhasil disalin ke clipboard!");
+    }).catch(() => {
+      alert("Gagal menyalin tautan.");
+    });
+  }
+</script>
+{% endblock %}

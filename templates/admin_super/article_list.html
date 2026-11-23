@@ -1,0 +1,148 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Kelola Artikel — FRAMEHAUS Management{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
+</a>
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
+</a>
+<a href="{% url 'app:article_list' %}" class="active">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'artikel' %}" target="_blank">
+  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+  <span>Lihat Journal Depan ↗</span>
+</a>
+{% endblock %}
+
+{% block page_title %}Manajemen Artikel & Journal{% endblock %}
+{% block page_subtitle %}Total {{ total }} artikel tersimpan di database. Perubahan langsung tayang di halaman Journal & Home.{% endblock %}
+
+{% block page_body %}
+<div class="dash-panel">
+  <div class="panel-head" style="flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h3>Daftar Artikel & Insights Kreatif</h3>
+      <span class="mono" style="font-size: 9px; color: var(--muted); text-transform: uppercase;">
+        EDITORIAL REPOSITORY & CONTENT MANAGER
+      </span>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <form method="GET" action="">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" name="search" placeholder="Cari judul artikel…" value="{{ search }}" autocomplete="off" />
+          {% if search %}
+            <a href="{% url 'app:article_list' %}" style="color: var(--muted); font-size: 11px;" title="Reset"><i class="fa-solid fa-xmark"></i></a>
+          {% endif %}
+        </div>
+      </form>
+      <a href="{% url 'app:article_create' %}" class="btn btn-primary" style="padding: 10px 18px; font-size: 12px; gap: 8px;">
+        <i class="fa-solid fa-plus"></i> Tulis Artikel Baru
+      </a>
+    </div>
+  </div>
+
+  {% if articles %}
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Cover</th>
+          <th>Judul Artikel</th>
+          <th>Kategori</th>
+          <th>Penulis</th>
+          <th>Estimasi Baca</th>
+          <th>Tanggal Rilis</th>
+          <th style="text-align: right;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in articles %}
+        <tr>
+          <td class="mono" style="color: #9ba095; font-size: 11px;">{{ forloop.counter }}</td>
+          <td>
+            <div style="width: 52px; height: 38px; border-radius: 8px; overflow: hidden; background: #e3e6dd; border: 1px solid var(--line);">
+              <img src="{{ a.get_image_url }}" alt="{{ a.judul }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=150&q=80'" />
+            </div>
+          </td>
+          <td>
+            <strong style="color: var(--ink); font-size: 13px;">{{ a.judul }}</strong>
+            <p style="font-size: 11px; color: var(--muted); margin: 3px 0 0; max-width: 340px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              {{ a.ringkasan }}
+            </p>
+          </td>
+          <td>
+            <span class="badge badge-primary">{{ a.get_kategori_display }}</span>
+          </td>
+          <td style="font-size: 12px; color: #4f554b; font-weight: 500;">
+            {{ a.penulis }}
+          </td>
+          <td style="font-size: 11px; color: #727a6c;">
+            <i class="fa-regular fa-clock" style="margin-right: 4px;"></i>{{ a.estimasi_baca }}
+          </td>
+          <td class="mono" style="font-size: 11px; color: #858c7e;">
+            {{ a.created_at|date:"d M Y" }}
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            <a href="{% url 'app:article_edit' a.id %}" class="btn btn-outline" style="padding: 7px 12px; font-size: 11px; margin-right: 4px;" title="Edit Artikel">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            <button onclick="confirmDeleteArticle('{{ a.id }}', '{{ a.judul|escapejs }}')" class="btn btn-danger" style="padding: 7px 12px; font-size: 11px;" title="Hapus Artikel">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+            <form id="delete-article-{{ a.id }}" method="POST" action="{% url 'app:article_delete' a.id %}" style="display: none;">
+              {% csrf_token %}
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 60px 20px; color: var(--muted);">
+    <i class="fa-solid fa-newspaper" style="font-size: 42px; opacity: .3; margin-bottom: 14px; display: block;"></i>
+    <p style="font-size: 14px; margin-bottom: 12px;">Belum ada artikel yang tersimpan di database.</p>
+    <a href="{% url 'app:article_create' %}" class="btn btn-primary" style="padding: 10px 20px; font-size: 12px;">
+      <i class="fa-solid fa-plus"></i> Buat Artikel Pertama
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  function confirmDeleteArticle(id, title) {
+    if (confirm(`Yakin ingin menghapus artikel "${title}"? Tindakan ini tidak dapat dibatalkan.`)) {
+      document.getElementById(`delete-article-${id}`).submit();
+    }
+  }
+</script>
+{% endblock %}

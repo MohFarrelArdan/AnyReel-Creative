@@ -1,0 +1,729 @@
+{% extends 'public_base.html' %}
+
+{% block title %}{{ service.nama }} — FRAMEHAUS Creative Studio{% endblock %}
+
+{% block public_extra_styles %}
+/* ==================== PRODUCT / SERVICE DETAIL ==================== */
+.detail-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 500 12px 'DM Mono', monospace;
+  color: var(--muted);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.detail-breadcrumb a {
+  color: #7b8474;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.detail-breadcrumb a:hover {
+  color: var(--ink);
+}
+.detail-breadcrumb span.sep {
+  color: #c0c6b9;
+}
+.detail-breadcrumb span.current {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* MAIN DETAIL GRID */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 48px;
+  align-items: flex-start;
+  margin-bottom: 60px;
+}
+
+/* VISUAL GALLERY CARD */
+.detail-gallery {
+  position: sticky;
+  top: 100px;
+}
+.detail-visual-box {
+  position: relative;
+  height: 480px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #171b17;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+.detail-visual-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--spring);
+}
+.detail-visual-box:hover img {
+  transform: scale(1.04);
+}
+.detail-badge-tag {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: rgba(23,27,23,.88);
+  backdrop-filter: blur(10px);
+  color: var(--lime);
+  font: 700 10px 'DM Mono', monospace;
+  letter-spacing: .08em;
+  padding: 6px 14px;
+  border-radius: 30px;
+  border: 1px solid rgba(200,241,105,.28);
+  text-transform: uppercase;
+  z-index: 2;
+}
+.detail-cat-pill {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font: 700 11px 'DM Sans', sans-serif;
+  padding: 6px 14px;
+  border-radius: 30px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  z-index: 2;
+}
+
+/* VALUE PILLARS STRIP */
+.detail-highlights {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+.highlight-pill {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.22s var(--spring);
+}
+.highlight-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+}
+.highlight-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #eef3e6;
+  color: #3b501e;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.highlight-text small {
+  display: block;
+  font: 700 9px 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.highlight-text strong {
+  font: 700 12px 'Manrope', sans-serif;
+  color: var(--ink);
+}
+
+/* RIGHT INFO COLUMN */
+.detail-info {
+  display: flex;
+  flex-direction: column;
+}
+.detail-eyebrow {
+  font: 700 11px 'DM Mono', monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #7b8870;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.detail-title {
+  font: 800 clamp(32px, 4vw, 44px)/1.08 'Manrope', sans-serif;
+  letter-spacing: -.06em;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+.detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.stars {
+  color: #f5a623;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.rating-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+.rating-text strong {
+  color: var(--ink);
+}
+
+/* PRICE & CTA CARD */
+.price-cta-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 26px 28px;
+  box-shadow: 0 16px 45px rgba(22,27,20,.05);
+  margin-bottom: 28px;
+}
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eef0ea;
+}
+.price-display {
+  font: 800 clamp(32px, 3.5vw, 42px)/1 'Manrope', sans-serif;
+  letter-spacing: -.06em;
+  color: var(--ink);
+}
+.price-sub {
+  font: 600 11px 'DM Mono', monospace;
+  color: #737c68;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.duration-tag {
+  background: #edf3e4;
+  color: #3b501e;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font: 700 11px 'DM Mono', monospace;
+}
+.cta-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.cta-buttons .btn {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 13px;
+  border-radius: 14px;
+}
+.btn-direct-order {
+  grid-column: 1 / -1;
+  background: var(--dark);
+  color: #fff;
+  font-weight: 800;
+  border: 1px solid var(--dark);
+}
+.btn-direct-order:hover {
+  background: #000;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+}
+.btn-add-cart {
+  background: var(--lime);
+  color: var(--ink);
+  font-weight: 800;
+  border: 1px solid #b5e44a;
+}
+.btn-add-cart:hover {
+  background: #d4f77c;
+  transform: translateY(-2px);
+}
+.btn-wa-chat {
+  background: #fff;
+  border: 1.5px solid #25d366;
+  color: #128c7e;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.btn-wa-chat:hover {
+  background: #f0fbf5;
+  color: #075e54;
+}
+
+/* DESCRIPTION & SPECS */
+.detail-section-title {
+  font: 800 18px 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  margin: 24px 0 12px;
+}
+.detail-desc-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #636b5c;
+  margin-bottom: 24px;
+}
+
+/* INCLUDED LIST */
+.scope-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.scope-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fafbf8;
+  border: 1px solid #ebece4;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+.scope-item i {
+  color: #4b6623;
+  font-size: 14px;
+}
+
+/* WORKFLOW STRIP */
+.workflow-section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 44px;
+  margin: 40px 0 60px;
+}
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 28px;
+}
+.workflow-step {
+  padding: 22px;
+  border: 1px solid #eff0ea;
+  border-radius: 20px;
+  background: #fafbf8;
+  transition: all .25s var(--spring);
+}
+.workflow-step:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.06);
+  background: #fff;
+}
+.step-num {
+  font: 800 24px 'Manrope', sans-serif;
+  color: #8a9a70;
+  margin-bottom: 12px;
+}
+.workflow-step h4 {
+  font: 700 15px 'Manrope', sans-serif;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.workflow-step p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #798072;
+  margin: 0;
+}
+
+/* RELATED SERVICES */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: 24px;
+}
+.related-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  transition: all .3s var(--spring);
+  display: flex;
+  flex-direction: column;
+}
+.related-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow);
+}
+.related-img {
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+  background: #171b17;
+}
+.related-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s;
+}
+.related-card:hover .related-img img {
+  transform: scale(1.06);
+}
+.related-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.related-body h4 {
+  font: 700 16px 'Manrope', sans-serif;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.related-body p {
+  font-size: 12px;
+  color: #7d8475;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  flex: 1;
+}
+.related-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid #f0f1eb;
+}
+
+@media(max-width: 992px) {
+  .detail-grid { grid-template-columns: 1fr; gap: 32px; }
+  .detail-gallery { position: static; }
+  .workflow-grid { grid-template-columns: repeat(2, 1fr); }
+  .related-grid { grid-template-columns: 1fr; }
+}
+@media(max-width: 600px) {
+  .detail-visual-box { height: 320px; }
+  .cta-buttons { grid-template-columns: 1fr; }
+  .workflow-grid { grid-template-columns: 1fr; }
+  .detail-highlights { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block page_content %}
+<div class="wrap" style="padding-top: 36px;">
+  <!-- BREADCRUMBS -->
+  <nav class="detail-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'home' %}"><i class="fa-solid fa-house" style="font-size: 11px;"></i> Beranda</a>
+    <span class="sep">/</span>
+    <a href="{% url 'shop' %}">Katalog Layanan</a>
+    <span class="sep">/</span>
+    <a href="{% url 'shop' %}?cat={{ service.kategori }}">{{ service.get_kategori_display }}</a>
+    <span class="sep">/</span>
+    <span class="current">{{ service.nama }}</span>
+  </nav>
+
+  <!-- MAIN PRODUCT DETAIL GRID -->
+  <div class="detail-grid">
+    <!-- LEFT: VISUAL & HIGHLIGHTS -->
+    <div class="detail-gallery" data-reveal="left">
+      <div class="detail-visual-box">
+        <img src="{{ service.get_image_url }}" alt="{{ service.nama }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80'" />
+        <span class="detail-badge-tag">{{ service.tag }}</span>
+        <span class="detail-cat-pill">{{ service.get_kategori_display }}</span>
+      </div>
+
+      <div class="detail-highlights">
+        <div class="highlight-pill">
+          <div class="highlight-icon"><i class="fa-regular fa-clock"></i></div>
+          <div class="highlight-text">
+            <small>ESTIMASI DURASI</small>
+            <strong>{{ service.durasi }}</strong>
+          </div>
+        </div>
+
+        <div class="highlight-pill">
+          <div class="highlight-icon"><i class="fa-solid fa-film"></i></div>
+          <div class="highlight-text">
+            <small>FORMAT EXPORT</small>
+            <strong>4K UHD & Full HD Master</strong>
+          </div>
+        </div>
+
+        <div class="highlight-pill">
+          <div class="highlight-icon"><i class="fa-solid fa-music"></i></div>
+          <div class="highlight-text">
+            <small>SOUND DESIGN</small>
+            <strong>Bebas Royalti / Lisensi Aman</strong>
+          </div>
+        </div>
+
+        <div class="highlight-pill">
+          <div class="highlight-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+          <div class="highlight-text">
+            <small>GARANSI REVISI</small>
+            <strong>2x Revisi Minor Gratis</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PRODUCT DETAILS & ORDER ACTION -->
+    <div class="detail-info" data-reveal="right">
+      <div class="detail-eyebrow">
+        <span>FRAMEHAUS EDITING SUITE</span> · <span>{{ service.get_kategori_display|upper }}</span>
+      </div>
+
+      <h1 class="detail-title">{{ service.nama }}</h1>
+
+      <div class="detail-rating">
+        <div class="stars">★★★★★</div>
+        <div class="rating-text"><strong>4.9 / 5.0</strong> dari 150+ proyek selesai</div>
+        <span style="color: #9cb57b; font-size: 11px; font-weight: 700; background: #eef5e6; padding: 3px 9px; border-radius: 20px;">
+          ✓ Layanan Terverifikasi Studio
+        </span>
+      </div>
+
+      <!-- PRICING & ACTION CARD -->
+      <div class="price-cta-card">
+        <div class="price-row">
+          <div>
+            <div style="font: 700 10px 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;">
+              INVESTASI PRODUKSI
+            </div>
+            <div class="price-display">
+              {% if service.harga > 0 %}
+                Rp {{ service.harga|floatformat:"0" }}
+              {% else %}
+                Konsultasi Bebas (Gratis)
+              {% endif %}
+            </div>
+            <div class="price-sub">
+              <span>● Termasuk Master Rendering 4K</span>
+            </div>
+          </div>
+          <div class="duration-tag">
+            <i class="fa-regular fa-clock" style="margin-right: 4px;"></i>{{ service.durasi }}
+          </div>
+        </div>
+
+        <div class="cta-buttons">
+          <button type="button" class="btn btn-add-cart" onclick="addToCart('{{ service.id }}', '{{ service.nama|escapejs }}', {{ service.harga }}, '{{ service.kategori|escapejs }}', '{{ service.durasi|escapejs }}', '{{ service.get_image_url|escapejs }}')">
+            <i class="fa-solid fa-cart-plus"></i> Tambah ke Keranjang
+          </button>
+
+          <a href="https://api.whatsapp.com/send?phone={{ web_setting.clean_wa_number }}&text=Halo%20FRAMEHAUS%20Studio%2C%20saya%20tertarik%20konsultasi%20layanan%20{{ service.nama|urlencode }}" onclick="handleWhatsAppChat(event, '{{ web_setting.clean_wa_number }}', '{{ service.nama|escapejs }}')" target="_blank" rel="noopener noreferrer" class="btn btn-wa-chat">
+            <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp
+          </a>
+
+          <button type="button" class="btn btn-direct-order" onclick="directOrderNow('{{ service.id }}', '{{ service.nama|escapejs }}', {{ service.harga }}, '{{ service.kategori|escapejs }}', '{{ service.durasi|escapejs }}', '{{ service.get_image_url|escapejs }}')">
+            Pesan Layanan Ini Sekarang ↗
+          </button>
+        </div>
+      </div>
+
+      <!-- DESKRIPSI LENGKAP -->
+      <h3 class="detail-section-title">Deskripsi & Spesifikasi Layanan</h3>
+      <div class="detail-desc-text">
+        {{ service.deskripsi|linebreaks }}
+      </div>
+
+      <!-- WHAT IS INCLUDED -->
+      <h3 class="detail-section-title">Apa yang Anda Dapatkan dalam Paket Ini?</h3>
+      <div class="scope-list">
+        <div class="scope-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Penyusunan alur cerita visual (narrative storytelling & pacing ritme dinamis).</span>
+        </div>
+        <div class="scope-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Color grading profesional (penyesuaian color space Rec.709, kontras, dan tone sinematik).</span>
+        </div>
+        <div class="scope-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Sound design lengkap (ambient foley, SFX transisi, dialog cleanup, dan musik lisensi).</span>
+        </div>
+        <div class="scope-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Format rasio serbaguna (16:9 horizontal YouTube/Layar lebar atau 9:16 vertikal Reels/TikTok).</span>
+        </div>
+        <div class="scope-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Revisi minor gratis 2 kali melalui pencatatan timestamp yang transparan.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKFLOW SECTION -->
+  <section class="workflow-section" data-reveal>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div>
+        <div class="eyebrow">OUR PROCESS</div>
+        <h2 style="font: 800 clamp(24px, 3.2vw, 36px) 'Manrope', sans-serif; letter-spacing: -.05em; margin: 8px 0 0;">
+          Alur Pengerjaan Editing di FRAMEHAUS
+        </h2>
+      </div>
+      <p style="color: var(--muted); font-size: 13px; max-width: 420px; margin: 0;">
+        Kami memastikan proses pasca-produksi berjalan terstruktur, cepat, dan transparan dari footage mentah hingga hasil akhir.
+      </p>
+    </div>
+
+    <div class="workflow-grid">
+      <div class="workflow-step">
+        <div class="step-num">01</div>
+        <h4>Brief & Kirim Footage</h4>
+        <p>Kirimkan file footage mentah melalui Google Drive, Dropbox, atau tautan cloud beserta arahan konsep video Anda.</p>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">02</div>
+        <h4>Rough Cut & Review</h4>
+        <p>Editor kami menyusun potongan kasar dan ritme cerita utama untuk Anda review pertama kali.</p>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">03</div>
+        <h4>Grading & Sound Finishing</h4>
+        <p>Penyempurnaan warna sinematik, efek suara, pencampuran audio spatial, dan teks kinetik grafis.</p>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">04</div>
+        <h4>Master 4K Delivery</h4>
+        <p>File video master 4K resolusi tinggi siap diunggah dikirimkan langsung ke link download Anda.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATED SERVICES -->
+  {% if related_services %}
+  <section class="section" style="padding-top: 0; padding-bottom: 40px;" data-reveal>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+      <div>
+        <div class="eyebrow">EXPLORE MORE</div>
+        <h2 style="font: 800 28px 'Manrope', sans-serif; letter-spacing: -.05em; margin: 6px 0 0;">
+          Layanan Lainnya yang Relevan
+        </h2>
+      </div>
+      <a href="{% url 'shop' %}" class="btn btn-outline btn-sm">Lihat Semua di Shop ↗</a>
+    </div>
+
+    <div class="related-grid">
+      {% for r in related_services %}
+      <div class="related-card">
+        <div class="related-img">
+          <a href="{% url 'service_detail' r.id %}" style="display: block; width: 100%; height: 100%;">
+            <img src="{{ r.get_image_url }}" alt="{{ r.nama }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'" />
+          </a>
+          <span style="position: absolute; top: 12px; left: 12px; background: rgba(23,27,23,.85); color: var(--lime); font: 700 9px 'DM Mono', monospace; padding: 4px 10px; border-radius: 20px;">
+            {{ r.tag }}
+          </span>
+        </div>
+        <div class="related-body">
+          <h4><a href="{% url 'service_detail' r.id %}" style="color: inherit; text-decoration: none;">{{ r.nama }}</a></h4>
+          <p>{{ r.deskripsi|truncatechars:90 }}</p>
+          <div class="related-foot">
+            <div>
+              <strong style="font: 800 16px 'Manrope', sans-serif; color: var(--ink);">
+                Rp {{ r.harga|floatformat:"0" }}
+              </strong>
+              <div style="font-size: 10px; color: var(--muted);"><i class="fa-regular fa-clock"></i> {{ r.durasi }}</div>
+            </div>
+            <a href="{% url 'service_detail' r.id %}" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 6px 12px;">
+              Lihat Detail ↗
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block public_scripts %}
+<script>
+  // Fail-safe definition of addToCart if not yet declared
+  if (typeof window.addToCart !== 'function') {
+    window.addToCart = function(id, name, price, cat, duration, img) {
+      if (typeof addToCartObject === 'function') {
+        addToCartObject({
+          id: String(id),
+          name: name || 'Layanan Video',
+          price: Number(price) || 0,
+          cat: cat || 'video',
+          duration: duration || '1–3 Hari',
+          img: img || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'
+        });
+      }
+    };
+  }
+
+  function handleWhatsAppChat(e, rawPhone, serviceName) {
+    if (e) e.preventDefault();
+    let phone = String(rawPhone || '').replace(/\D/g, '');
+    if (phone.startsWith('08')) {
+      phone = '628' + phone.substring(2);
+    } else if (phone.startsWith('8')) {
+      phone = '628' + phone.substring(1);
+    }
+    if (!phone || phone.length < 8) {
+      phone = '6281234567890';
+    }
+
+    const message = encodeURIComponent(`Halo FRAMEHAUS Studio, saya tertarik untuk konsultasi mengenai layanan "${serviceName}". Mohon info ketersediaan dan detail produksinya.`);
+    
+    // Tautan WhatsApp resmi (bekerja mulus di WhatsApp Web PC maupun WhatsApp Mobile)
+    const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function directOrderNow(id, name, price, cat, duration, img) {
+    // 1. Masukkan item layanan ke keranjang belanja
+    if (typeof addToCart === 'function') {
+      addToCart(id, name, price, cat, duration, img);
+    } else if (typeof addToCartObject === 'function') {
+      addToCartObject({
+        id: String(id),
+        name: name || 'Layanan Video',
+        price: Number(price) || 0,
+        cat: cat || 'video',
+        duration: duration || '1–3 Hari',
+        img: img || ''
+      });
+    }
+
+    // 2. Buka Drawer Keranjang
+    if (typeof openCart === 'function') {
+      openCart();
+    }
+
+    // 3. Jika pengguna belum login, tampilkan pesan informatif
+    if (!isUserAuthenticated) {
+      setTimeout(function() {
+        const wantsLogin = confirm("Layanan berhasil ditambahkan ke keranjang!\n\nUntuk menyelesaikan pesanan dan mengunggah bahan video, Anda perlu masuk (login) ke akun Anda.\n\nKlik OK untuk ke halaman Login sekarang, atau Batal untuk tetap melihat rincian keranjang.");
+        if (wantsLogin) {
+          window.location.href = loginUrl;
+        }
+      }, 350);
+      return;
+    }
+
+    // 4. Jika sudah login, fokuskan langsung ke input link drive footage di dalam drawer
+    setTimeout(function() {
+      const driveInput = document.getElementById('formVideoLink');
+      if (driveInput) {
+        driveInput.focus();
+      }
+    }, 400);
+  }
+</script>
+{% endblock %}

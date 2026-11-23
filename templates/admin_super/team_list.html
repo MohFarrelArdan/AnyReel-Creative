@@ -1,0 +1,133 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Manajemen Tim — FRAMEHAUS Management{% endblock %}
+{% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
+</a>
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
+</a>
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}" class="active">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
+</a>
+{% endblock %}
+
+{% block page_title %}Manajemen Tim Studio{% endblock %}
+{% block page_subtitle %}Kelola profil personil studio, nama, role/jabatan, foto, keahlian software, dan link media sosial yang tampil di halaman About.{% endblock %}
+
+{% block page_body %}
+<div class="dash-panel">
+  <div class="panel-head">
+    <div>
+      <h3>Daftar Anggota Tim (Total: {{ total }})</h3>
+      <p style="font-size: 12px; color: var(--muted); margin: 3px 0 0;">Anggota yang berstatus aktif akan langsung ditampilkan pada halaman About.</p>
+    </div>
+    <a href="{% url 'app:team_create' %}" class="btn btn-dark btn-sm">
+      <i class="fa-solid fa-plus"></i> Tambah Anggota Tim
+    </a>
+  </div>
+
+  <div class="table-wrap">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th style="width: 50px;">Urut</th>
+          <th>Profil Personil</th>
+          <th>Role & Lencana</th>
+          <th>Keahlian / Software</th>
+          <th>Status</th>
+          <th style="text-align: right;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr>
+          <td style="font: 700 12px 'DM Mono', monospace; color: var(--muted);">
+            #{{ m.urutan }}
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <img src="{{ m.get_photo_url }}" alt="{{ m.nama }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line);" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'" />
+              <div>
+                <strong style="display: block; font: 700 14px 'Manrope', sans-serif; color: var(--ink);">{{ m.nama }}</strong>
+                <small style="color: var(--muted); font-size: 11px;">{{ m.email|default:"Tidak ada email" }}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 13px; color: var(--ink);">{{ m.role }}</div>
+            <span class="status-badge" style="background: rgba(200,241,105,.2); color: #354920; font-size: 9px; padding: 2px 7px;">{{ m.role_badge }}</span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              {% for k in m.get_keahlian_list %}
+              <span style="background: #f1f2ec; font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #555d4e;">{{ k }}</span>
+              {% empty %}
+              <span style="color: var(--muted); font-size: 11px;">-</span>
+              {% endfor %}
+            </div>
+          </td>
+          <td>
+            {% if m.aktif %}
+            <span class="status-badge status-active">Aktif</span>
+            {% else %}
+            <span class="status-badge status-inactive">Nonaktif</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            <div style="display: inline-flex; gap: 6px;">
+              <a href="{% url 'app:team_toggle_active' m.id %}" class="btn btn-outline btn-sm" style="padding: 6px 10px; font-size: 11px;" title="Ubah Status">
+                {% if m.aktif %}<i class="fa-solid fa-eye-slash"></i> Sembunyikan{% else %}<i class="fa-solid fa-eye"></i> Tampilkan{% endif %}
+              </a>
+              <a href="{% url 'app:team_edit' m.id %}" class="btn btn-outline btn-sm" style="padding: 6px 10px; font-size: 11px;">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </a>
+              <form method="POST" action="{% url 'app:team_delete' m.id %}" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus {{ m.nama|escapejs }} dari database?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm" style="padding: 6px 10px; color: #c94a4a; font-size: 11px;">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 40px; color: var(--muted);">
+            Belum ada anggota tim terdaftar. Klik tombol "Tambah Anggota Tim" di atas.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

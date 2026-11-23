@@ -1,159 +1,216 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Profil Pengguna — Sistem Manajemen{% endblock %}
-{% block role_label %}Pengguna{% endblock %}
+{% block title %}Profil Saya — FRAMEHAUS Management{% endblock %}
 {% block role_badge %}Pengguna{% endblock %}
+{% block nav_label %}Workspace{% endblock %}
 
 {% block sidebar_nav %}
-<p class="nav-section-label">Menu</p>
-<a href="{% url 'app:dashboard' %}" class="nav-item">
-  <i class="fa-solid fa-house"></i> Dashboard
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-house"></i>
+  <span>Overview</span>
 </a>
-<p class="nav-section-label">Akun</p>
-<a href="{% url 'app:profile_pengguna' %}" class="nav-item active">
-  <i class="fa-solid fa-circle-user"></i> Profil Saya
+<a href="{% url 'app:profile_pengguna' %}" class="active">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Saya</span>
 </a>
 {% endblock %}
 
-{% block page_title %}Profil Saya{% endblock %}
+{% block page_title %}Profil Anggota{% endblock %}
+{% block page_subtitle %}Lengkapi identitas pribadi, afiliasi kampus, dan tautan profil riset akademik Anda.{% endblock %}
 
 {% block page_body %}
-<div style="max-width: 800px;">
-  <!-- Profile Header -->
-  <div class="profile-header-card" style="margin-bottom: 24px;">
+<div style="max-width: 820px;">
+  <!-- PROFILE HEADER CARD -->
+  <div class="profile-header-card">
     {% if photo %}
-      <img src="{{ photo.url }}" alt="Foto Profil" class="profile-avatar-large" />
+      <img src="{{ photo.url }}" alt="Foto Profil" class="profile-avatar-lg" />
     {% else %}
-      <div class="profile-avatar-large-placeholder">{{ request.user.first_name|first|upper }}</div>
+      <div class="profile-avatar-lg-placeholder">{{ request.user.first_name|default:request.user.username|first|upper }}</div>
     {% endif %}
-    <div class="profile-header-info">
-      <h2>{{ request.user.first_name }}</h2>
-      <p>{{ request.user.email }}</p>
-      {% if userpengguna.jafung %}
-      <p style="margin-top: 6px;">
-        <span class="badge badge-primary">{{ userpengguna.jafung }}</span>
+
+    <div class="profile-info">
+      {% if userpengguna and userpengguna.jafung %}
+        <span class="badge badge-primary" style="margin-bottom: 6px;">
+          <i class="fa-solid fa-award"></i> {{ userpengguna.jafung }}
+        </span>
+      {% else %}
+        <span class="badge badge-warning" style="margin-bottom: 6px;">
+          <i class="fa-solid fa-circle-info"></i> Profil Belum Lengkap
+        </span>
+      {% endif %}
+
+      <h2>{{ request.user.first_name|default:request.user.username }}</h2>
+      <p><i class="fa-regular fa-envelope" style="margin-right: 6px;"></i>{{ request.user.email }}</p>
+      
+      {% if userpengguna and userpengguna.provinsi_anggota %}
+      <p style="margin-top: 4px; font-size: 11px;">
+        <i class="fa-solid fa-location-dot" style="margin-right: 6px; color: #7b944f;"></i>
+        {{ userpengguna.provinsi_anggota.nama_provinsi }}
       </p>
       {% endif %}
     </div>
   </div>
 
+  <!-- FORM CARD -->
   <div class="form-card">
     <div class="form-card-title">
-      <i class="fa-solid fa-pen-to-square" style="color:var(--primary);margin-right:8px;"></i>
-      Edit Profil Saya
+      <i class="fa-solid fa-pen-nib" style="color: #6a7d4e;"></i>
+      Edit Informasi Lengkap Anggota
     </div>
+
     <form method="POST" action="{% url 'app:profile_pengguna' %}" enctype="multipart/form-data">
       {% csrf_token %}
 
-      <!-- Style Django widgets -->
-      <style>
-        .form-control, #id_telp, #id_gender, #id_nuptk, #id_jafung,
-        #id_bidang_keahlian, #id_alamat, #id_photo, #id_provinsi_anggota,
-        #id_link_sinta, #id_link_scopus, #id_link_google_scholar, #id_link_orcid {
-          width: 100%; padding: 12px 16px;
-          background: var(--bg-input) !important; border: 1px solid var(--border) !important;
-          border-radius: 10px !important; color: var(--text) !important;
-          font-family: 'Inter', sans-serif !important;
-          font-size: 14px !important; transition: all 0.2s ease; outline: none;
-        }
-        .form-control:focus, #id_telp:focus, #id_gender:focus, #id_nuptk:focus,
-        #id_jafung:focus, #id_bidang_keahlian:focus, #id_alamat:focus,
-        #id_provinsi_anggota:focus, #id_link_sinta:focus, #id_link_scopus:focus,
-        #id_link_google_scholar:focus, #id_link_orcid:focus {
-          border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
-        }
-        option { background: #1a1a2e; color: var(--text); }
-        .form-section-divider {
-          font-size: 12px; font-weight: 700; color: var(--text-muted);
-          text-transform: uppercase; letter-spacing: 0.8px;
-          margin: 24px 0 16px; padding-bottom: 10px;
-          border-bottom: 1px solid var(--border);
-        }
-      </style>
+      <!-- SECTION 1: PERSONAL & CONTACT -->
+      <div class="form-section-divider" style="margin-top: 6px;">
+        <i class="fa-solid fa-user"></i> 1. Identitas & Domisili Kampus
+      </div>
 
-      <!-- Personal Info -->
-      <div class="form-section-divider"><i class="fa-solid fa-user" style="margin-right:6px;"></i>Informasi Pribadi</div>
       <div class="form-grid">
-        <div class="form-group-dash">
-          <label class="form-label-dash">Nomor Telepon *</label>
+        <div class="form-group">
+          <label class="form-label" for="id_telp">
+            Nomor Telepon / WhatsApp <span style="color: #b66d65;">*</span>
+          </label>
           {{ form.telp }}
-          {% for e in form.telp.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+          {% if form.telp.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.telp.errors.0 }}</small>
+          {% endif %}
         </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Jenis Kelamin *</label>
+
+        <div class="form-group">
+          <label class="form-label" for="id_gender">
+            Jenis Kelamin <span style="color: #b66d65;">*</span>
+          </label>
           {{ form.gender }}
-          {% for e in form.gender.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+          {% if form.gender.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.gender.errors.0 }}</small>
+          {% endif %}
         </div>
       </div>
+
       <div class="form-grid">
-        <div class="form-group-dash">
-          <label class="form-label-dash">Alamat Instansi</label>
-          {{ form.alamat }}
-        </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Provinsi Domisili *</label>
+        <div class="form-group">
+          <label class="form-label" for="id_provinsi_anggota">
+            Provinsi Domisili Kampus <span style="color: #b66d65;">*</span>
+          </label>
           {{ form.provinsi_anggota }}
-          {% for e in form.provinsi_anggota.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+          {% if form.provinsi_anggota.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.provinsi_anggota.errors.0 }}</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_alamat">Alamat Instansi / Kampus</label>
+          {{ form.alamat }}
+          {% if form.alamat.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.alamat.errors.0 }}</small>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Academic Info -->
-      <div class="form-section-divider"><i class="fa-solid fa-graduation-cap" style="margin-right:6px;"></i>Informasi Akademik</div>
+      <!-- SECTION 2: ACADEMIC DETAILS -->
+      <div class="form-section-divider">
+        <i class="fa-solid fa-graduation-cap"></i> 2. Jabatan & Keahlian Akademik
+      </div>
+
       <div class="form-grid">
-        <div class="form-group-dash">
-          <label class="form-label-dash">NUPTK</label>
-          {{ form.nuptk }}
-        </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Jabatan Fungsional</label>
+        <div class="form-group">
+          <label class="form-label" for="id_jafung">Jabatan Fungsional</label>
           {{ form.jafung }}
+          {% if form.jafung.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.jafung.errors.0 }}</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_nuptk">Nomor NUPTK</label>
+          {{ form.nuptk }}
+          {% if form.nuptk.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.nuptk.errors.0 }}</small>
+          {% endif %}
         </div>
       </div>
-      <div class="form-group-dash">
-        <label class="form-label-dash">Bidang Keahlian</label>
+
+      <div class="form-group">
+        <label class="form-label" for="id_bidang_keahlian">Bidang Keahlian / Fokus Riset</label>
         {{ form.bidang_keahlian }}
+        {% if form.bidang_keahlian.errors %}
+          <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.bidang_keahlian.errors.0 }}</small>
+        {% endif %}
       </div>
 
-      <!-- Academic Links -->
-      <div class="form-section-divider"><i class="fa-solid fa-link" style="margin-right:6px;"></i>Link Akademik</div>
+      <!-- SECTION 3: ACADEMIC REPOSITORY LINKS -->
+      <div class="form-section-divider">
+        <i class="fa-solid fa-link"></i> 3. Profil Riset & Indeksasi
+      </div>
+
       <div class="form-grid">
-        <div class="form-group-dash">
-          <label class="form-label-dash">Link SINTA *</label>
+        <div class="form-group">
+          <label class="form-label" for="id_link_sinta">
+            Tautan SINTA <span style="color: #b66d65;">*</span>
+          </label>
           {{ form.link_sinta }}
-          {% for e in form.link_sinta.errors %}<small style="color:#f87171;">{{ e }}</small>{% endfor %}
+          {% if form.link_sinta.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.link_sinta.errors.0 }}</small>
+          {% endif %}
         </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Link Scopus</label>
+
+        <div class="form-group">
+          <label class="form-label" for="id_link_scopus">Tautan Scopus (Opsional)</label>
           {{ form.link_scopus }}
-        </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Link Google Scholar</label>
-          {{ form.link_google_scholar }}
-        </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Link ORCID</label>
-          {{ form.link_orcid }}
+          {% if form.link_scopus.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.link_scopus.errors.0 }}</small>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Photo -->
-      <div class="form-section-divider"><i class="fa-solid fa-image" style="margin-right:6px;"></i>Foto Profil</div>
-      <div class="form-group-dash">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="id_link_google_scholar">Tautan Google Scholar (Opsional)</label>
+          {{ form.link_google_scholar }}
+          {% if form.link_google_scholar.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.link_google_scholar.errors.0 }}</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_link_orcid">Tautan ORCID (Opsional)</label>
+          {{ form.link_orcid }}
+          {% if form.link_orcid.errors %}
+            <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.link_orcid.errors.0 }}</small>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- SECTION 4: PHOTO -->
+      <div class="form-section-divider">
+        <i class="fa-solid fa-image"></i> 4. Foto Profil
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_photo">Unggah Berkas Foto Resmi</label>
         {{ form.photo }}
+        {% if form.photo.errors %}
+          <small style="color: #b66d65; font-size: 11px; display: block; margin-top: 4px;">{{ form.photo.errors.0 }}</small>
+        {% endif %}
+
         {% if photo %}
-        <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
-          <img src="{{ photo.url }}" alt="Foto saat ini" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" />
-          <span style="font-size:13px;color:var(--text-muted);">Foto profil saat ini</span>
+        <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; width: fit-content;">
+          <img src="{{ photo.url }}" alt="Foto Sekarang" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--lime);" />
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--ink);">Foto profil aktif</div>
+            <div style="font-size: 10px; color: var(--muted);">Unggah file gambar baru untuk memperbarui</div>
+          </div>
         </div>
         {% endif %}
       </div>
 
       <div class="form-footer">
-        <button type="submit" class="btn btn-primary" id="btn-save-pengguna">
-          <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+        <button type="submit" class="btn btn-dark" id="btn-save-pengguna">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Profil Saya
         </button>
-        <a href="{% url 'app:dashboard' %}" class="btn btn-ghost">
-          <i class="fa-solid fa-arrow-left"></i> Kembali
+        <a href="{% url 'app:dashboard' %}" class="btn btn-outline">
+          Kembali ke Dashboard
         </a>
       </div>
     </form>

@@ -1,88 +1,123 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Profil Admin — Sistem Manajemen{% endblock %}
-{% block role_label %}Super Admin{% endblock %}
+{% block title %}Profil Admin — FRAMEHAUS Management{% endblock %}
 {% block role_badge %}Super Admin{% endblock %}
+{% block nav_label %}Admin Management{% endblock %}
 
 {% block sidebar_nav %}
-<p class="nav-section-label">Menu</p>
-<a href="{% url 'app:dashboard' %}" class="nav-item">
-  <i class="fa-solid fa-chart-pie"></i> Dashboard
+<a href="{% url 'app:dashboard' %}">
+  <i class="fa-solid fa-chart-pie"></i>
+  <span>Overview</span>
 </a>
-<a href="{% url 'app:user_list' %}" class="nav-item">
-  <i class="fa-solid fa-users"></i> Manajemen User
+<a href="{% url 'app:service_list' %}">
+  <i class="fa-solid fa-film"></i>
+  <span>Kelola Layanan</span>
 </a>
-<p class="nav-section-label">Akun</p>
-<a href="{% url 'app:profile_admin' %}" class="nav-item active">
-  <i class="fa-solid fa-circle-user"></i> Profil Admin
+<a href="{% url 'app:article_list' %}">
+  <i class="fa-solid fa-newspaper"></i>
+  <span>Kelola Artikel</span>
+</a>
+<a href="{% url 'app:team_list' %}">
+  <i class="fa-solid fa-id-badge"></i>
+  <span>Manajemen Tim</span>
+</a>
+<a href="{% url 'app:web_settings' %}">
+  <i class="fa-solid fa-sliders"></i>
+  <span>Pengaturan Web</span>
+</a>
+<a href="{% url 'app:user_list' %}">
+  <i class="fa-solid fa-users"></i>
+  <span>Manajemen User</span>
+</a>
+<a href="{% url 'app:profile_admin' %}" class="active">
+  <i class="fa-solid fa-circle-user"></i>
+  <span>Profil Admin</span>
+</a>
+<div style="border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0;"></div>
+<a href="{% url 'home' %}" target="_blank">
+  <i class="fa-solid fa-globe"></i>
+  <span>Lihat Website Depan ↗</span>
 </a>
 {% endblock %}
 
-{% block page_title %}Profil Admin{% endblock %}
+{% block page_title %}Profil Administrator{% endblock %}
+{% block page_subtitle %}Kelola identitas, kontak, dan foto resmi super admin.{% endblock %}
 
 {% block page_body %}
-<div style="max-width: 680px;">
-  <!-- Profile Header -->
+<div style="max-width: 720px;">
+  <!-- PROFILE HEADER CARD -->
   <div class="profile-header-card">
     {% if photo %}
-      <img src="{{ photo.url }}" alt="Foto Profil" class="profile-avatar-large" />
+      <img src="{{ photo.url }}" alt="Foto Profil Admin" class="profile-avatar-lg" />
     {% else %}
-      <div class="profile-avatar-large-placeholder">{{ request.user.first_name|first|upper }}</div>
+      <div class="profile-avatar-lg-placeholder">{{ request.user.first_name|default:request.user.username|first|upper }}</div>
     {% endif %}
-    <div class="profile-header-info">
-      <h2>{{ request.user.first_name }}</h2>
-      <p>{{ request.user.email }}</p>
+
+    <div class="profile-info">
+      <span class="badge badge-primary" style="margin-bottom: 6px;">
+        <i class="fa-solid fa-shield-halved" style="font-size: 8px;"></i> Hak Akses Super Admin
+      </span>
+      <h2>{{ request.user.first_name|default:request.user.username }}</h2>
+      <p><i class="fa-regular fa-envelope" style="margin-right: 6px;"></i>{{ request.user.email|default:request.user.username }}</p>
       {% if useradmin.telp %}
-      <p style="margin-top:6px; color: var(--text-muted);">
-        <i class="fa-solid fa-phone" style="margin-right:6px;"></i>{{ useradmin.telp }}
-      </p>
+      <p style="margin-top: 4px;"><i class="fa-solid fa-phone" style="margin-right: 6px;"></i>{{ useradmin.telp }}</p>
       {% endif %}
     </div>
   </div>
 
+  <!-- FORM CARD -->
   <div class="form-card">
     <div class="form-card-title">
-      <i class="fa-solid fa-pen-to-square" style="color:var(--primary);margin-right:8px;"></i>
-      Edit Profil Admin
+      <i class="fa-solid fa-pen-to-square" style="color: #6a7d4e;"></i>
+      Edit Informasi Profil
     </div>
+
     <form method="POST" action="{% url 'app:profile_admin' %}" enctype="multipart/form-data">
       {% csrf_token %}
+      
       <div class="form-grid">
-        <div class="form-group-dash">
-          <label class="form-label-dash">Nomor Telepon</label>
+        <div class="form-group">
+          <label class="form-label" for="id_telp">Nomor Telepon / WhatsApp</label>
           {{ form.telp }}
+          {% if form.telp.errors %}
+            <small style="color: #b66d65; font-size: 11px;">{{ form.telp.errors.0 }}</small>
+          {% endif %}
         </div>
-        <div class="form-group-dash">
-          <label class="form-label-dash">Jenis Kelamin</label>
+
+        <div class="form-group">
+          <label class="form-label" for="id_gender">Jenis Kelamin</label>
           {{ form.gender }}
+          {% if form.gender.errors %}
+            <small style="color: #b66d65; font-size: 11px;">{{ form.gender.errors.0 }}</small>
+          {% endif %}
         </div>
       </div>
-      <div class="form-group-dash">
-        <label class="form-label-dash">Foto Profil</label>
+
+      <div class="form-group">
+        <label class="form-label" for="id_photo">Foto Profil Resmi</label>
         {{ form.photo }}
+        {% if form.photo.errors %}
+          <small style="color: #b66d65; font-size: 11px;">{{ form.photo.errors.0 }}</small>
+        {% endif %}
+        
         {% if photo %}
-        <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
-          <img src="{{ photo.url }}" alt="Foto saat ini" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" />
-          <span style="font-size:13px;color:var(--text-muted);">Foto saat ini</span>
+        <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fafbf8; border: 1px solid var(--line); border-radius: 12px; width: fit-content;">
+          <img src="{{ photo.url }}" alt="Preview" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--lime);" />
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--ink);">Foto aktif tersimpan</div>
+            <div style="font-size: 10px; color: var(--muted);">Unggah berkas baru jika ingin mengganti</div>
+          </div>
         </div>
         {% endif %}
       </div>
 
-      <!-- Style the Django form widgets -->
-      <style>
-        #id_telp, #id_gender, #id_photo {
-          width: 100%; padding: 12px 16px;
-          background: var(--bg-input); border: 1px solid var(--border);
-          border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif;
-          font-size: 14px; transition: all 0.2s ease; outline: none;
-        }
-        #id_telp:focus, #id_gender:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-      </style>
-
       <div class="form-footer">
-        <button type="submit" class="btn btn-primary" id="btn-save-profile">
-          <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+        <button type="submit" class="btn btn-dark" id="btn-save-profile">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
         </button>
+        <a href="{% url 'app:dashboard' %}" class="btn btn-outline">
+          Kembali
+        </a>
       </div>
     </form>
   </div>
