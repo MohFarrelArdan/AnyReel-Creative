@@ -44,6 +44,10 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
 ]
 
+# Proxy & SSL configuration for production deployment (Vercel, Cloudflare, etc.)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 
@@ -211,13 +215,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Session settings
-SESSION_COOKIE_AGE = 86400 * 7  # 7 days
+SESSION_COOKIE_AGE = 86400 * 14  # 14 days
 SESSION_SAVE_EVERY_REQUEST = False  # Avoid concurrent write collisions / session drops
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Reverse Proxy / SSL settings (for Vercel & HTTPS proxies)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 # Midtrans Payment Gateway Configuration
 MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'SB-Mid-server-J.j-PoXUUXZKyfZ8dZKsSxkB')

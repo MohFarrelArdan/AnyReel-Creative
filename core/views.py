@@ -271,7 +271,7 @@ def pesanView(request):
     """
     if not request.user.is_authenticated:
         messages.warning(request, 'Silakan login sebagai user terlebih dahulu untuk memesan layanan.')
-        return redirect('/login/?next=/shop/')
+        return redirect('/login/?next=/shop/?checkout_flow=1')
 
     if request.method == 'POST':
         layanan_nama = request.POST.get('layanan_nama', 'Custom Video Editing').strip()

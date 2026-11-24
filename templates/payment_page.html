@@ -939,6 +939,11 @@
 </div>
 
 <script>
+  // Bersihkan keranjang belanja karena pesanan sudah berhasil dibuat dan masuk ke gateway pembayaran
+  try {
+    localStorage.removeItem('fh_cart');
+  } catch (e) {}
+
   var currentSelectedMethod = "BCA Virtual Account (Sandbox)";
 
   function startSandboxPayment() {

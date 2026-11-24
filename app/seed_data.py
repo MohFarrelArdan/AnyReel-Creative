@@ -230,7 +230,8 @@ def seed_demo_accounts():
     admin_user.is_superuser = True
     admin_user.is_staff = True
     admin_user.is_active = True
-    admin_user.set_password("admin123")
+    if not admin_user.check_password("admin123"):
+        admin_user.set_password("admin123")
     admin_user.save()
 
     UserAdmin.objects.get_or_create(
@@ -244,7 +245,8 @@ def seed_demo_accounts():
     # Also update muhfarelardan if exists to share password admin123
     mf_user = User.objects.filter(username="muhfarelardan").first()
     if mf_user:
-        mf_user.set_password("admin123")
+        if not mf_user.check_password("admin123"):
+            mf_user.set_password("admin123")
         mf_user.last_name = "Super Admin"
         mf_user.is_superuser = True
         mf_user.is_staff = True
@@ -263,7 +265,8 @@ def seed_demo_accounts():
     demo_user.is_superuser = False
     demo_user.is_staff = False
     demo_user.is_active = True
-    demo_user.set_password("user123")
+    if not demo_user.check_password("user123"):
+        demo_user.set_password("user123")
     demo_user.save()
 
     UserPengguna.objects.get_or_create(

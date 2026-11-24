@@ -685,7 +685,7 @@ footer {
         </div>
       </div>
 
-      <button type="button" class="btn btn-dark" style="width: 100%;" onclick="handleCheckout()">
+      <button type="button" id="btnSubmitOrder" class="btn btn-dark" style="width: 100%;" onclick="handleCheckout()">
         Lanjut Buat Pesanan ↗
       </button>
     </form>
@@ -814,7 +814,7 @@ footer {
 
 <script>
   const isUserAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
-  const loginUrl = "{% url 'login' %}?next={{ request.path }}";
+  const loginUrl = "{% url 'login' %}?next=" + encodeURIComponent("{% url 'shop' %}?checkout_flow=1");
 
   let cart = JSON.parse(localStorage.getItem('fh_cart') || '[]');
   const formatRupiah = (num) => 'Rp' + Number(num).toLocaleString('id-ID');
@@ -923,9 +923,15 @@ footer {
     }
 
     if (!isUserAuthenticated) {
-      alert("Perhatian: Anda harus login sebagai user terlebih dahulu sebelum dapat melakukan pemesanan.");
+      alert("Perhatian: Anda harus login sebagai user terlebih dahulu sebelum dapat melakukan pemesanan. Setelah login, Anda akan otomatis kembali ke keranjang ini untuk melanjutkan pembayaran.");
       window.location.href = loginUrl;
       return;
+    }
+
+    const submitBtn = document.getElementById('btnSubmitOrder');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan Gateway Pembayaran...';
     }
 
     const mainItem = cart[0];
@@ -938,7 +944,6 @@ footer {
     document.getElementById('formDurasi').value = mainItem.duration || '3–5 hari';
     document.getElementById('formCatatan').value = `Total item: ${cart.length}. Estimasi: ${serviceNames}`;
 
-    localStorage.removeItem('fh_cart');
     document.getElementById('orderForm').submit();
   }
 
@@ -1004,6 +1009,13 @@ footer {
   }
 
   updateCartUI();
+  document.addEventListener('DOMContentLoaded', () => {
+    updateCartUI();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('checkout_flow') === '1' && cart.length > 0) {
+      openCart();
+    }
+  });
 </script>
 
 {% block public_scripts %}{% endblock %}
